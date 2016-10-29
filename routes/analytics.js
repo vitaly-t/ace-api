@@ -2,7 +2,7 @@ const
     express = require('express'),
     router = express.Router();
 
-let db;
+var db;
 
 require('mongodb').MongoClient.connect(process.env.MONGODB_URI, (err, database) => {
     db = database;
