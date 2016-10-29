@@ -23,9 +23,11 @@ router.post('/:exerciseId/reports', [bodyValidation({
 
 router.put('/:exerciseId', authentication(true), (req, res) => {
     const exercise = req.body;
-    exercisesDao.answer(req.params.exerciseId, req.clientId, exercise.correct)
+    exercisesDao.answer(req.params.exerciseId, req.clientId, exercise.answer_status)
         .then(() => res.status(204).send())
-        .catch(err => res.status(500).send({err}));
+        .catch(err => {
+            res.status(500).send({err})
+        });
 });
 
 module.exports = router;

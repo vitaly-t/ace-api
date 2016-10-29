@@ -4,7 +4,7 @@ select *, (
         select *, (
             select json_agg(row_to_json(e)) exercises
             from (
-                select *
+                select exercises.*, answers.status as answer_status
                     from exercises
                     left join answers on exercises.id = exercise_id and answers.client_id = ${clientId}
                     where collection_id=c.id
