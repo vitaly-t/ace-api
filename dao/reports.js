@@ -3,15 +3,14 @@ const
     sql = require('../services/sql');
 
 
-const send = (exerciseId, report, callback) => {
+const send = (exerciseId, report) => {
     db.one(sql.reports.insert, {
             exerciseId,
             message: report.message,
             device: report.device,
             email: report.email
         })
-        .then((reportId) => callback(null, reportId.id))
-        .catch(callback);
+        .then(result => result.id)
 };
 
 module.exports = {

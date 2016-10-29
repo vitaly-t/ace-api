@@ -12,15 +12,15 @@ const
 
 
 router.get('/', authentication(false), (req, res) => {
-    subjectsDao.findAll(req.clientId, (err, subjects) => {
-        err ? res.status(500).send({err}) : res.status(200).send(subjects);
-    });
+    subjectsDao.findAll(req.clientId)
+        .then(subjects => res.status(200).send(subjects))
+        .catch(err => res.status(500).send({err}));
 });
 
 router.get('/:subjectId', authentication(false), (req, res) => {
-    subjectsDao.findById(req.params.subjectId, req.clientId, true, (err, subject) => {
-        err ? res.status(404).send({err}) : res.status(200).send(subject);
-    });
+    subjectsDao.findById(req.params.subjectId, req.clientId, true)
+        .then(subject => res.status(200).send(subject))
+        .catch(err => res.status(500).send({err}));
 });
 
 router.get('/:subjectId/:hash', authentication(false), (req, res) => {
@@ -28,9 +28,9 @@ router.get('/:subjectId/:hash', authentication(false), (req, res) => {
         subjectId = req.params.subjectId,
         hashed = crypto.createHash('md5').update(subjectId).digest('hex');
     if (hashed !== req.params.hash) return res.status(404).send();
-    subjectsDao.findById(subjectId, req.clientId, false, (err, subject) => {
-        err ? res.status(404).send({err}) : res.status(200).send(subject);
-    });
+    subjectsDao.findById(req.params.subjectId, req.clientId, false)
+        .then(subject => res.status(200).send(subject))
+        .catch(err => res.status(500).send({err}));
 });
 
 router.put('/:subjectId', [authentication(true), bodyValidation({
@@ -40,11 +40,10 @@ router.put('/:subjectId', [authentication(true), bodyValidation({
     const
         subjectId = req.params.subjectId,
         clientId = req.clientId,
-        callback = err => {
-            err ? res.status(500).send({err}) : res.status(204).send();
-        };
-    if(req.body.favorite) subjectsDao.addToFavorites(subjectId, clientId, callback);
-    else subjectsDao.removeFromFavorites(subjectId, clientId, callback);
+        onError = err => res.status(500).send({err}),
+        onSuccess = () => res.status(204).send();
+    if(req.body.favorite) subjectsDao.addToFavorites(subjectId, clientId).then(onSuccess).catch(onError);
+    else subjectsDao.removeFromFavorites(subjectId, clientId).then(onSuccess).catch(onError);
 });
 
 
