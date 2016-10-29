@@ -20,6 +20,7 @@ app.use((req, res, next) => {
 
 app.use('/subjects', require('./routes/subjects'));
 app.use('/exercises', require('./routes/exercises'));
+app.use('/analytics', require('./routes/analytics'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res) {
