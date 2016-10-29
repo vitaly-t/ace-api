@@ -1,6 +1,7 @@
 const
     db = require('db'),
-    sql = require('../services/sql');
+    sql = require('../services/sql'),
+    subjectService = require('../services/subject-service');
 
 const findAll = (clientId, callback) => {
     db.any(sql.subjects.findAll, {clientId})
@@ -10,7 +11,7 @@ const findAll = (clientId, callback) => {
 
 const findById = (subjectId, clientId, showOnlyIfPublished, callback) => {
     db.one(sql.subjects.findById, {subjectId, clientId, forceShow: !showOnlyIfPublished})
-        .then(subject => callback(null, subject))
+        .then(subject => callback(null, subjectService.processSubject(subject)))
         .catch(callback);
 };
 
