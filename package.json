@@ -7,10 +7,10 @@
   },
   "dependencies": {
     "body-parser": "~1.15.1",
-    "body-validation": "file:///Users/futurnur/node_mods/body-validation",
+    "body-validation": "file:local_node_modules/body-validation",
     "cookie-parser": "~1.4.3",
     "crypto": "0.0.3",
-    "db": "file:///Users/futurnur/node_mods/db",
+    "db": "file:local_node_modules/db",
     "debug": "~2.2.0",
     "express": "~4.13.4",
     "jade": "~1.11.0",
