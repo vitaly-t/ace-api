@@ -2,7 +2,7 @@ const
     db = require('db'),
     sql = require('../services/sql');
 
-const findAll = (clientId = 0, callback) => {
+const findAll = (clientId, callback) => {
     db.any(sql.subjects.findAll, {clientId})
         .then(subjects => callback(null, subjects))
         .catch(callback)
