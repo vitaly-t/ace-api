@@ -18,7 +18,9 @@ router.post('/:exerciseId/reports', [bodyValidation({
 })], (req, res) => {
     reportsDao.send(req.params.exerciseId, req.body)
         .then((insertedId) => res.status(201).send({insertedId}))
-        .catch(err => res.status(500).send({err}));
+        .catch(err => {
+            res.status(500).send({err})
+        });
 });
 
 router.put('/:exerciseId', authentication(true), (req, res) => {
