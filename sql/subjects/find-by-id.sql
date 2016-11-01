@@ -12,7 +12,8 @@ select *, (
             ) e
         )
         from collections c
-        where subject_id=subjects.id) c
+        where subject_id=subjects.id
+        order by position, id) c
 ) collections
 from subjects
 where id=${subjectId} and (published='yes' or ${forceShow})
