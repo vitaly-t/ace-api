@@ -14,7 +14,9 @@ const
 router.get('/', authentication(false), (req, res) => {
     subjectsDao.findAll(req.clientId)
         .then(subjects => res.status(200).send(subjects))
-        .catch(err => res.status(500).send({err}));
+        .catch(err =>
+            res.status(500).send({err})
+        );
 });
 
 router.get('/:subjectId', authentication(false), (req, res) => {
