@@ -13,7 +13,8 @@ module.exports = {
         findAll:            sql('../sql/subjects/find-all.sql'),
         update:             sql('../sql/subjects/update.sql'),
         addToFavorites:            sql('../sql/subjects/add-to-favorites.sql'),
-        removeFromFavorites:            sql('../sql/subjects/remove-from-favorites.sql')
+        removeFromFavorites:            sql('../sql/subjects/remove-from-favorites.sql'),
+        downloadsToday:            sql('../sql/subjects/downloads-today.sql')
     },
     exercises: {
         answer:             sql('../sql/exercises/answer.sql')

@@ -18,6 +18,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/', require('./routes/index'));
 app.use('/subjects', require('./routes/subjects'));
 app.use('/exercises', require('./routes/exercises'));
 app.use('/analytics', require('./routes/analytics'));

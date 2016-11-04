@@ -15,9 +15,15 @@ const addToFavorites = (subjectId, clientId) =>
 const removeFromFavorites = (subjectId, clientId) =>
     db.none(sql.subjects.removeFromFavorites, {clientId, subjectId});
 
+const downloadsToday = () =>
+    db.one(sql.subjects.downloadsToday)
+        .then(row =>
+            row.count);
+
 module.exports = {
     findAll,
     findById,
     addToFavorites,
-    removeFromFavorites
+    removeFromFavorites,
+    downloadsToday
 };
