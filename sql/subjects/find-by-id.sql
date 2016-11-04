@@ -1,4 +1,5 @@
--- Taking clientId, subjectId and forceShow
+-- clientId
+-- subjectId
 -- forceShow: Show subject even though it is not published
 
 select *, (
