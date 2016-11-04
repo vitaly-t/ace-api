@@ -10,10 +10,10 @@ const findById = (subjectId, clientId, showOnlyIfPublished) =>
         .then(subject => subjectService.processSubject(subject));
 
 const addToFavorites = (subjectId, clientId) =>
-    db.none('insert into favorites (client_id, subject_id) values (${clientId}, ${subjectId})', {clientId, subjectId});
+    db.none(sql.subjects.addToFavorites, {clientId, subjectId});
 
 const removeFromFavorites = (subjectId, clientId) =>
-    db.none('delete from favorites where client_id = ${clientId} and subject_id = ${subjectId}', {clientId, subjectId});
+    db.none(sql.subjects.removeFromFavorites, {clientId, subjectId});
 
 module.exports = {
     findAll,

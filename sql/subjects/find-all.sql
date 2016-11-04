@@ -1,3 +1,4 @@
+-- Taking clientId
 select subjects.*, count (exercises.id) as n_exercises, case
         when ${clientId} in (select client_id from favorites where subject_id = subjects.id)
             then true

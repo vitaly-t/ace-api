@@ -1,3 +1,6 @@
+-- Taking clientId, subjectId and forceShow
+-- forceShow: Show subject even though it is not published
+
 select *, (
     select json_agg(row_to_json(c))
     from (

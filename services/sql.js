@@ -11,7 +11,9 @@ module.exports = {
     subjects: {
         findById: sql('../sql/subjects/find-by-id.sql'),
         findAll:            sql('../sql/subjects/find-all.sql'),
-        update:             sql('../sql/subjects/update.sql')
+        update:             sql('../sql/subjects/update.sql'),
+        addToFavorites:            sql('../sql/subjects/add-to-favorites.sql'),
+        removeFromFavorites:            sql('../sql/subjects/remove-from-favorites.sql')
     },
     exercises: {
         answer:             sql('../sql/exercises/answer.sql')
