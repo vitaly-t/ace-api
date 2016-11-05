@@ -1,7 +1,8 @@
 const
     express = require('express'),
     router = express.Router(),
-    subjectsDao = require('../dao/subjects');
+    subjectsDao = require('../dao/subjects'),
+    uuid = require('uuid');
 
 
 router.get('/today', (req, res) => {
@@ -10,6 +11,10 @@ router.get('/today', (req, res) => {
         .catch(err =>
             res.status(500).send({err})
         );
+});
+
+router.get('/anonymous', (req, res) => {
+    res.send({uuid: uuid.v1()})
 });
 
 module.exports = router;
