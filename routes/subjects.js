@@ -21,8 +21,10 @@ router.get('/', authentication(false), (req, res) => {
 
 router.get('/:subjectId', authentication(false), (req, res) => {
     subjectsDao.findById(req.params.subjectId, req.clientId, true)
-        .then(subject => res.status(200).send(subject))
-        .catch(err => res.status(500).send({err}));
+        .then(subject =>
+            res.status(200).send(subject))
+        .catch(err =>
+            res.status(500).send({err}));
 });
 
 router.get('/:subjectId/:hash', authentication(false), (req, res) => {

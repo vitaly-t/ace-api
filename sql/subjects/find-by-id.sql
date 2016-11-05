@@ -3,10 +3,10 @@
 -- forceShow: Show subject even though it is not published
 
 select *, (
-    select json_agg(row_to_json(c))
+    select coalesce (json_agg(row_to_json(c)), '[]')
     from (
         select *, (
-            select json_agg(row_to_json(e)) exercises
+            select coalesce (json_agg(row_to_json(e)), '[]') exercises
             from (
                 select exercises.*, answers.status as answer_status
                     from exercises
