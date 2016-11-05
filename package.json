@@ -6,6 +6,7 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "batch-request": "^0.1.4",
     "body-parser": "~1.15.1",
     "body-validation": "*",
     "crypto": "0.0.3",

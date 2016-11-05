@@ -2,8 +2,10 @@ const
     express = require('express'),
     router = express.Router(),
     subjectsDao = require('../dao/subjects'),
+    batch = require('batch-request')(),
     uuid = require('uuid');
 
+router.post('/batch', batch.validate, batch);
 
 router.get('/today', (req, res) => {
     subjectsDao.downloadsToday()
