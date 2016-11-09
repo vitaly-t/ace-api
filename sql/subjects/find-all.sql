@@ -9,4 +9,4 @@ from subjects
 left join favorites on subjects.id = subject_id
 where published = 'yes'
 group by subjects.id
-order by code;
+order by downloads desc, code;
