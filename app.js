@@ -11,6 +11,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
   req.clientId = req.get('Client-Id') || undefined;
+  req.web = req.get('platform') == 'web';
   res.header('Api-Version', process.env.API_VERSION || 0);
   res.header("Access-Control-Allow-Origin", "*");
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');

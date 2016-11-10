@@ -13,7 +13,8 @@ const
 
 router.get('/', authentication(false), (req, res) => {
     subjectsDao.findAll(req.clientId)
-        .then(subjects => res.status(200).send(subjects))
+        .then(subjects =>
+            res.status(200).send(subjects.filter(subject => req.web || !subject.web_only)))
         .catch(err =>
             res.status(500).send({err})
         );
