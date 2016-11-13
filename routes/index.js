@@ -3,16 +3,18 @@ const
     router = express.Router(),
     subjectsDao = require('../dao/subjects'),
     batch = require('batch-request')(),
+    db = require('db'),
+    sql = require('../services/sql'),
     uuid = require('uuid');
 
 router.post('/batch', batch.validate, batch);
 
-router.get('/today', (req, res) => {
-    subjectsDao.downloadsToday()
-        .then(downloads => res.status(200).send({n: downloads}))
+router.get('/statistics', (req, res) => {
+    db.any(sql.statistics, {nHours: parseInt(req.query.n) || 12})
+        .then(result =>
+            res.status(200).send(result))
         .catch(err =>
-            res.status(500).send({err})
-        );
+            res.status(500).send({err}));
 });
 
 router.get('/anonymous', (req, res) => {
