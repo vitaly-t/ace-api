@@ -21,6 +21,5 @@ module.exports = {
     },
     reports: {
         insert:             sql('../sql/reports/insert.sql')
-    },
-    statistics: sql('../sql/statistics.sql')
+    }
 };

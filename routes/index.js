@@ -9,14 +9,6 @@ const
 
 router.post('/batch', batch.validate, batch);
 
-router.get('/statistics', (req, res) => {
-    db.any(sql.statistics, {nHours: parseInt(req.query.n) || 12})
-        .then(result =>
-            res.status(200).send(result))
-        .catch(err =>
-            res.status(500).send({err}));
-});
-
 router.get('/anonymous', (req, res) => {
     res.send({uuid: uuid.v1()})
 });
