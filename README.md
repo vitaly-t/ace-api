@@ -104,3 +104,24 @@ PUT /exercises/{exerciseId}
 ```json
 204 No content
 ```
+
+## Report exercise
+
+```
+POST /exercises/{exerciseId}/reports
+```
+
+####Data
+
+```json
+{
+  "message": "String",
+  "device": "String",
+  "email": "Optional String"
+}
+```
+
+####Success response:
+```json
+201 Created
+```
