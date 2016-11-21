@@ -21,5 +21,9 @@ module.exports = {
     },
     reports: {
         insert:             sql('../sql/reports/insert.sql')
+    },
+    comments: {
+        create:             sql('../sql/comments/create.sql'),
+        find:             sql('../sql/comments/find.sql')
     }
 };

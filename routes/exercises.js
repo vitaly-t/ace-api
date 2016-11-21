@@ -4,6 +4,7 @@ const
 
     exercisesDao = require('../dao/exercises'),
     reportsDao = require('../dao/reports'),
+    commentsDao = require('../dao/comments'),
     bodyValidation = require('body-validation'),
     authentication = require('../middleware/user-authentication');
 
@@ -30,6 +31,22 @@ router.put('/:exerciseId', authentication(true), (req, res) => {
         .catch(err => {
             res.status(500).send({err})
         });
+});
+
+router.post('/:exerciseId/comments', authentication(true), (req, res) => {
+    const comment = req.body;
+    commentsDao.create(req.params.exerciseId, req.clientId, comment.message)
+        .then(() => res.status(204).send())
+        .catch(err =>
+            res.status(500).send({err}));
+});
+
+router.get('/:exerciseId/comments', (req, res) => {
+    commentsDao.find(req.params.exerciseId)
+        .then((comments) =>
+            res.status(200).send(comments))
+        .catch(err =>
+            res.status(500).send({err}));
 });
 
 module.exports = router;
