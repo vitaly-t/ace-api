@@ -28,6 +28,14 @@ router.get('/:subjectId', authentication(false), (req, res) => {
             res.status(500).send({err}));
 });
 
+router.get('/:subjectId/collections', (req, res) => {
+    subjectsDao.findCollections(req.params.subjectId)
+        .then(collections =>
+            res.status(200).send(collections))
+        .catch(err =>
+            res.status(500).send({err}));
+});
+
 router.get('/:subjectId/:hash', authentication(false), (req, res) => {
     const
         subjectId = req.params.subjectId,
