@@ -23,6 +23,9 @@ module.exports = {
     reports: {
         insert:             sql('../sql/reports/insert.sql')
     },
+    collections: {
+        quiz:             sql('../sql/collections/quiz.sql'),
+    },
     comments: {
         create:             sql('../sql/comments/create.sql'),
         find:             sql('../sql/comments/find.sql')
