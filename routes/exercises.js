@@ -6,7 +6,17 @@ const
     reportsDao = require('../dao/reports'),
     commentsDao = require('../dao/comments'),
     bodyValidation = require('body-validation'),
-    authentication = require('../middleware/user-authentication');
+    authentication = require('../middleware/user-authentication'),
+    db = require('db'),
+    sql = require('../services/sql');
+
+router.get('/:exerciseId', (req, res) => {
+    db.one(sql.exercises.findOne, {exerciseId: req.params.exerciseId})
+        .then(exercise => res.status(200).send(exercise))
+        .catch(err => {
+            res.status(500).send({err})
+        });
+});
 
 router.post('/:exerciseId/reports', [bodyValidation({
     type: 'object',
