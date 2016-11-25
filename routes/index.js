@@ -2,7 +2,9 @@ const
     express = require('express'),
     router = express.Router(),
     subjectsDao = require('../dao/subjects'),
-    batch = require('batch-request')(),
+    batch = require('batch-request')({
+        max: 100
+    }),
     db = require('db'),
     sql = require('../services/sql'),
     uuid = require('uuid');

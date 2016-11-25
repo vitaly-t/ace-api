@@ -14,12 +14,21 @@ module.exports = {
         update:             sql('../sql/subjects/update.sql'),
         addToFavorites:            sql('../sql/subjects/add-to-favorites.sql'),
         removeFromFavorites:            sql('../sql/subjects/remove-from-favorites.sql'),
-        downloadsToday:            sql('../sql/subjects/downloads-today.sql')
+        findCollections:             sql('../sql/subjects/find-collections.sql'),
+        downloadsToday:            sql('../sql/subjects/downloads-today.sql'),
     },
     exercises: {
-        answer:             sql('../sql/exercises/answer.sql')
+        answer:             sql('../sql/exercises/answer.sql'),
+        findOne:             sql('../sql/exercises/find-one.sql')
     },
     reports: {
         insert:             sql('../sql/reports/insert.sql')
+    },
+    collections: {
+        quiz:             sql('../sql/collections/quiz.sql'),
+    },
+    comments: {
+        create:             sql('../sql/comments/create.sql'),
+        find:             sql('../sql/comments/find.sql')
     }
 };

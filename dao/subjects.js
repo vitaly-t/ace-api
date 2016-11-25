@@ -20,10 +20,14 @@ const downloadsToday = () =>
         .then(row =>
             row.count);
 
+const findCollections = (subjectId) =>
+    db.any(sql.subjects.findCollections, {subjectId});
+
 module.exports = {
     findAll,
     findById,
     addToFavorites,
     removeFromFavorites,
-    downloadsToday
+    downloadsToday,
+    findCollections
 };
