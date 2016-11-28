@@ -7,7 +7,7 @@ module.exports = (willStop) => (req, res, next) => {
         if(err) return willStop ?
             res.status(401).send({message: 'X-Access-Token is not valid'})
             : next();
-        req.user = decoded;
+        req.user = decoded.user;
         next();
     });
 };

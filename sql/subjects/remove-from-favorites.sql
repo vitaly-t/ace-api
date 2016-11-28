@@ -1,4 +1,4 @@
--- clientId
+-- userId
 -- subjectId
 
-delete from favorites where client_id = ${clientId} and subject_id = ${subjectId}
+delete from favorites where user_id = ${userId} and subject_id = ${subjectId}

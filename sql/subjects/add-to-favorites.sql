@@ -1,4 +1,4 @@
--- clientId
+-- userId
 -- subjectId
 
-insert into favorites (client_id, subject_id) values (${clientId}, ${subjectId})
+insert into favorites (user_id, subject_id) values (${userId}, ${subjectId})
