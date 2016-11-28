@@ -3,7 +3,6 @@ const
     router = express.Router(),
 
     exercisesDao = require('../dao/exercises'),
-    reportsDao = require('../dao/reports'),
     commentsDao = require('../dao/comments'),
     bodyValidation = require('body-validation'),
     authentication = require('../middleware/user-authentication'),
@@ -27,7 +26,14 @@ router.post('/:exerciseId/reports', [bodyValidation({
         email: {type: 'string'}
     }
 })], (req, res) => {
-    reportsDao.send(req.params.exerciseId, req.body)
+    const report = req.body;
+    db.one(sql.reports.insert, {
+            exerciseId: req.params.exerciseId,
+            message: report.message,
+            device: report.device,
+            email: report.email
+        })
+        .then(result => result.id)
         .then((insertedId) => res.status(201).send({insertedId}))
         .catch(err => {
             res.status(500).send({err})

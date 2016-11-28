@@ -27,6 +27,10 @@ module.exports = {
     collections: {
         quiz:             sql('../sql/collections/quiz.sql'),
     },
+    users: {
+        findOne:             sql('../sql/users/find-one.sql'),
+        create:             sql('../sql/users/create.sql')
+    },
     comments: {
         create:             sql('../sql/comments/create.sql'),
         find:             sql('../sql/comments/find.sql')
