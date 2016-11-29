@@ -1,2 +1,2 @@
-insert into comments (exercise_id, client_id, message)
-values (${exerciseId}, ${clientId}, ${message});
+insert into comments (exercise_id, user_id, message)
+values (${exerciseId}, ${userId}, ${message});

@@ -3,7 +3,6 @@ const
     router = express.Router(),
 
     exercisesDao = require('../dao/exercises'),
-    commentsDao = require('../dao/comments'),
     bodyValidation = require('body-validation'),
     authentication = require('../middleware/user-authentication'),
     db = require('db'),
@@ -42,7 +41,7 @@ router.post('/:exerciseId/reports', [bodyValidation({
 
 router.put('/:exerciseId', authentication(true), (req, res) => {
     const exercise = req.body;
-    exercisesDao.answer(req.params.exerciseId, req.clientId, exercise.answer_status)
+    exercisesDao.answer(req.params.exerciseId, req.user.id, exercise.answer_status)
         .then(() => res.status(204).send())
         .catch(err => {
             res.status(500).send({err})
@@ -51,14 +50,14 @@ router.put('/:exerciseId', authentication(true), (req, res) => {
 
 router.post('/:exerciseId/comments', authentication(true), (req, res) => {
     const comment = req.body;
-    commentsDao.create(req.params.exerciseId, req.clientId, comment.message)
+    db.none(sql.comments.create, {userId: req.user.id, exerciseId: req.params.exerciseId, message: comment.message})
         .then(() => res.status(204).send())
         .catch(err =>
             res.status(500).send({err}));
 });
 
 router.get('/:exerciseId/comments', (req, res) => {
-    commentsDao.find(req.params.exerciseId)
+    db.any(sql.comments.find, { exerciseId: req.params.exerciseId })
         .then((comments) =>
             res.status(200).send(comments))
         .catch(err =>
