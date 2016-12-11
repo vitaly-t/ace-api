@@ -7,8 +7,15 @@ const
     db = require('db'),
     bodyValidation = require('body-validation'),
     authentication = require('../middleware/user-authentication'),
+    sql = require('../services/sql'),
     subjectsDao = require('../dao/subjects');
 
+
+router.get('/:subjectId/rank', (req, res) => {
+    db.one(sql.subjects.rank, { clientId: req.clientId, subjectId:req.params.subjectId })
+        .then(result => res.send(result))
+        .catch(console.log);
+});
 
 
 router.get('/', authentication(false), (req, res) => {
@@ -24,14 +31,6 @@ router.get('/:subjectId', authentication(false), (req, res) => {
     subjectsDao.findById(req.params.subjectId, req.clientId, true)
         .then(subject =>
             res.status(200).send(subject))
-        .catch(err =>
-            res.status(500).send({err}));
-});
-
-router.get('/:subjectId/collections', (req, res) => {
-    subjectsDao.findCollections(req.params.subjectId)
-        .then(collections =>
-            res.status(200).send(collections))
         .catch(err =>
             res.status(500).send({err}));
 });
