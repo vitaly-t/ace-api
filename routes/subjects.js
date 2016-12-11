@@ -7,8 +7,15 @@ const
     db = require('db'),
     bodyValidation = require('body-validation'),
     authentication = require('../middleware/user-authentication'),
+    sql = require('../services/sql'),
     subjectsDao = require('../dao/subjects');
 
+
+router.get('/:subjectId/rank', (req, res) => {
+    db.one(sql.subjects.rank, { clientId: req.clientId, subjectId:req.params.subjectId })
+        .then(result => res.send(result))
+        .catch(console.log);
+});
 
 
 router.get('/', authentication(false), (req, res) => {

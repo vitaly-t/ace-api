@@ -14,6 +14,7 @@ module.exports = {
         update:             sql('../sql/subjects/update.sql'),
         addToFavorites:            sql('../sql/subjects/add-to-favorites.sql'),
         removeFromFavorites:            sql('../sql/subjects/remove-from-favorites.sql'),
+        rank:             sql('../sql/subjects/rank.sql'),
         downloadsToday:            sql('../sql/subjects/downloads-today.sql')
     },
     exercises: {
@@ -21,5 +22,5 @@ module.exports = {
     },
     reports: {
         insert:             sql('../sql/reports/insert.sql')
-    }
+    },
 };
