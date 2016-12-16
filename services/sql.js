@@ -18,7 +18,8 @@ module.exports = {
         downloadsToday:            sql('../sql/subjects/downloads-today.sql')
     },
     exercises: {
-        answer:             sql('../sql/exercises/answer.sql')
+        answer:             sql('../sql/exercises/answer.sql'),
+        findOne:             sql('../sql/exercises/find-one.sql')
     },
     reports: {
         insert:             sql('../sql/reports/insert.sql')
