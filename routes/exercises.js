@@ -2,7 +2,6 @@ const
     express = require('express'),
     router = express.Router(),
 
-    exercisesDao = require('../dao/exercises'),
     bodyValidation = require('body-validation'),
     authentication = require('../middleware/user-authentication'),
     db = require('db'),
@@ -27,11 +26,11 @@ router.post('/:exerciseId/reports', [bodyValidation({
 })], (req, res) => {
     const report = req.body;
     db.one(sql.reports.insert, {
-            exerciseId: req.params.exerciseId,
-            message: report.message,
-            device: report.device,
-            email: report.email
-        })
+        exerciseId: req.params.exerciseId,
+        message: report.message,
+        device: report.device,
+        email: report.email
+    })
         .then(result => result.id)
         .then((insertedId) => res.status(201).send({insertedId}))
         .catch(err => {
@@ -41,7 +40,11 @@ router.post('/:exerciseId/reports', [bodyValidation({
 
 router.put('/:exerciseId', authentication(true), (req, res) => {
     const exercise = req.body;
-    exercisesDao.answer(req.params.exerciseId, req.user.id, exercise.answer_status)
+    db.none(sql.exercises.answer, {
+        answerStatus: exercise.answer_status,
+        userId: req.user.id,
+        exerciseId: req.params.exerciseId
+    })
         .then(() => res.status(204).send())
         .catch(err => {
             res.status(500).send({err})
@@ -57,7 +60,7 @@ router.post('/:exerciseId/comments', authentication(true), (req, res) => {
 });
 
 router.get('/:exerciseId/comments', (req, res) => {
-    db.any(sql.comments.find, { exerciseId: req.params.exerciseId })
+    db.any(sql.comments.find, {exerciseId: req.params.exerciseId})
         .then((comments) =>
             res.status(200).send(comments))
         .catch(err =>

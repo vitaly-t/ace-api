@@ -8,7 +8,7 @@ const
 
 
 router.get('/:collectionId/quiz', authentication(true), (req, res) => {
-    db.any(sql.collections.quiz, {collectionId: req.params.collectionId, userId: req.user.id})
+    db.any(sql.collections.quiz, {collectionId: req.params.collectionId, userId: req.user.id, quizLength: 6})
         .then(exercises =>
             res.status(200).send(exercises))
         .catch(err =>
