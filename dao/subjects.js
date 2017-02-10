@@ -7,8 +7,8 @@ const findById = (subjectId, clientId, showOnlyIfPublished) =>
     db.one(sql.subjects.findById, {subjectId, clientId, forceShow: !showOnlyIfPublished})
         .then(subject => subjectService.processSubject(subject));
 
-const removeFromFavorites = (subjectId, clientId) =>
-    db.none(sql.subjects.removeFromFavorites, {clientId, subjectId});
+const removeFromFavorites = (subjectId, userId) =>
+    db.none(sql.subjects.removeFromFavorites, {userId, subjectId});
 
 const downloadsToday = () =>
     db.one(sql.subjects.downloadsToday)
