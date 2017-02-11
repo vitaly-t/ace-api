@@ -7,13 +7,13 @@ const
     db = require('db'),
     sql = require('../services/sql');
 
-router.get('/:exerciseId', (req, res) => {
+router.get('/:exerciseId', (req, res) =>
     db.one(sql.exercises.findOne, {exerciseId: req.params.exerciseId})
         .then(exercise => res.status(200).send(exercise))
         .catch(err => {
             res.status(500).send({err})
-        });
-});
+        })
+);
 
 router.post('/:exerciseId/reports', [bodyValidation({
     type: 'object',
@@ -24,13 +24,8 @@ router.post('/:exerciseId/reports', [bodyValidation({
         email: {type: 'string'}
     }
 })], (req, res) => {
-    const report = req.body;
-    db.one(sql.reports.insert, {
-        exerciseId: req.params.exerciseId,
-        message: report.message,
-        device: report.device,
-        email: report.email
-    })
+    req.body.exerciseId = req.params.exerciseId;
+    db.one(sql.reports.insert, req.body)
         .then(result => result.id)
         .then((insertedId) => res.status(201).send({insertedId}))
         .catch(err => {
@@ -38,18 +33,17 @@ router.post('/:exerciseId/reports', [bodyValidation({
         });
 });
 
-router.post('/:exerciseId/answer', authentication(true), (req, res) => {
-    const exercise = req.body;
+router.post('/:exerciseId/answer', authentication(true), (req, res) =>
     db.none(sql.exercises.answer, {
-        answerStatus: exercise.answer_status,
+        answerStatus: req.body.answer_status,
         userId: req.user.id,
         exerciseId: req.params.exerciseId
     })
         .then(() => res.status(204).send())
         .catch(err =>
             res.status(500).send({err})
-        );
-});
+        )
+);
 
 router.put('/:exerciseId', authentication(true), (req, res) => {
     req.body.exerciseId = req.params.exerciseId;
