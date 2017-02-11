@@ -18,14 +18,17 @@ module.exports = {
         downloadsToday:            sql('../sql/subjects/downloads-today.sql'),
     },
     exercises: {
+        update:             sql('../sql/exercises/update.sql'),
         answer:             sql('../sql/exercises/answer.sql'),
-        findOne:             sql('../sql/exercises/find-one.sql')
+        findOne:             sql('../sql/exercises/find-one.sql'),
+        vote:             sql('../sql/exercises/vote.sql')
     },
     reports: {
         insert:             sql('../sql/reports/insert.sql')
     },
     collections: {
         quiz:             sql('../sql/collections/quiz.sql'),
+        insertExercise:             sql('../sql/collections/insert-exercise.sql')
     },
     users: {
         findOne:             sql('../sql/users/find-one.sql'),

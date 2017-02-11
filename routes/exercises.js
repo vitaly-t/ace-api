@@ -38,7 +38,7 @@ router.post('/:exerciseId/reports', [bodyValidation({
         });
 });
 
-router.put('/:exerciseId', authentication(true), (req, res) => {
+router.post('/:exerciseId/answer', authentication(true), (req, res) => {
     const exercise = req.body;
     db.none(sql.exercises.answer, {
         answerStatus: exercise.answer_status,
@@ -46,10 +46,27 @@ router.put('/:exerciseId', authentication(true), (req, res) => {
         exerciseId: req.params.exerciseId
     })
         .then(() => res.status(204).send())
+        .catch(err =>
+            res.status(500).send({err})
+        );
+});
+
+router.put('/:exerciseId', authentication(true), (req, res) => {
+    req.body.exerciseId = req.params.exerciseId;
+    req.body.userId = req.user.id;
+    db.none(sql.exercises.update, req.body)
+        .then(() => res.status(204).send())
         .catch(err => {
             res.status(500).send({err})
         });
 });
+
+router.post('/:exerciseId/votes', authentication(true), (req, res) =>
+    db.none(sql.exercises.vote, { exerciseId: req.params.exerciseId, vote: req.body.upvote ? 1 : -1 })
+        .then(() => res.status(201).send())
+        .catch(err =>
+            res.status(500).send({err}))
+);
 
 router.post('/:exerciseId/comments', authentication(true), (req, res) => {
     const comment = req.body;

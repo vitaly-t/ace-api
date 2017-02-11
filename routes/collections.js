@@ -16,4 +16,15 @@ router.get('/:collectionId/quiz', authentication(true), (req, res) => {
         );
 });
 
+router.post('/:collectionId/exercises', authentication(true), (req, res) => {
+    req.body.collectionId = req.params.collectionId;
+    req.body.userId = req.user.id;
+    db.any(sql.collections.insertExercise, req.body)
+        .then(() =>
+            res.status(201).send({}))
+        .catch(err =>
+            res.status(500).send({err})
+        );
+});
+
 module.exports = router;
