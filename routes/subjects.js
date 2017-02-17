@@ -1,6 +1,7 @@
 const
     express = require('express'),
     router = express.Router(),
+    _ = require('underscore'),
     assert = require('assert'),
     mixpanel = require('mixpanel').init('88c1f7835742091ce51bd106fef2638e'),
     crypto = require('crypto'),
@@ -9,23 +10,18 @@ const
     bodyValidation = require('body-validation'),
     authentication = require('../middleware/user-authentication');
 
-
-
 router.get('/', authentication(false), (req, res) =>
     db.any(sql.subjects.findAll, {userId: req.user.id})
         .then(subjects =>
             res.status(200).send(subjects.filter(subject => req.web || !subject.web_only)))
         .catch(err =>
-            res.status(500).send({err})
-        )
+            res.status(500).send({err}))
 );
 
 router.get('/:subjectId', authentication(false), (req, res) =>
     db.one(sql.subjects.findById, {subjectId:req.params.subjectId, userId: req.user.id, forceShow: false })
-        .then(subject => {
-            subject.collections = `/subjects/${req.params.subjectId}/collections`;
-            return subject;
-        })
+        .then(subject =>
+            _.extend(subject, {collections: `/subjects/${req.params.subjectId}/collections`}))
         .then(subject =>
             res.status(200).send(subject))
         .catch(err =>
