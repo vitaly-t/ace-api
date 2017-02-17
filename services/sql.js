@@ -16,6 +16,7 @@ module.exports = {
         removeFromFavorites:            sql('../sql/subjects/remove-from-favorites.sql'),
         findCollections:             sql('../sql/subjects/find-collections.sql'),
         downloadsToday:            sql('../sql/subjects/downloads-today.sql'),
+        quiz:             sql('../sql/subjects/quiz.sql'),
     },
     exercises: {
         update:             sql('../sql/exercises/update.sql'),
