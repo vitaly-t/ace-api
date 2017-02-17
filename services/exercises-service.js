@@ -1,12 +1,12 @@
 const
     _ = require('underscore');
 
-const process = (exercise) => {
+const process = (exercise, maxAlts) => {
     switch (exercise.type) {
         case 'tf':
             return processTF(exercise);
         case 'mc':
-            return processMC(exercise);
+            return processMC(exercise, maxAlts);
         default:
             throw new Error('Neither tf nor mc')
     }
@@ -22,10 +22,10 @@ const processTF = (exercise) => ({
     answer_status: exercise.answer_status
 });
 
-const processMC = (exercise) => {
+const processMC = (exercise, maxAlts) => {
     corrects = _.map(exercise.content.corrects, correctAlt => _.extend(correctAlt, {correct: true}));
     wrongs = _.map(exercise.content.wrongs, wrongAlt => _.extend(wrongAlt, {correct: false}));
-    alternatives = _.map(corrects.concat(wrongs), alt => ({text: alt.answer, correct: alt.correct}));
+    alternatives = _.take(_.map(corrects.concat(wrongs), alt => ({text: alt.answer, correct: alt.correct})), maxAlts);
     shuffledAlternatives = _.shuffle(alternatives);
 
     return {

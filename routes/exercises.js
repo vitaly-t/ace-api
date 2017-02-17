@@ -1,7 +1,8 @@
 const
     express = require('express'),
     router = express.Router(),
-
+    _ = require('underscore'),
+    exerciseService = require('../services/exercises-service'),
     bodyValidation = require('body-validation'),
     authentication = require('../middleware/user-authentication'),
     db = require('db'),
@@ -9,6 +10,7 @@ const
 
 router.get('/:exerciseId', (req, res) =>
     db.one(sql.exercises.findOne, {exerciseId: req.params.exerciseId})
+        .then(exercise => exerciseService.process(exercise, req.query.max_alts || 4))
         .then(exercise => res.status(200).send(exercise))
         .catch(err => {
             res.status(500).send({err})
