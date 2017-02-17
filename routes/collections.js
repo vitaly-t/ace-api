@@ -10,7 +10,11 @@ const
 
 
 router.get('/:collectionId/quiz', authentication(true), (req, res) => {
-    db.any(sql.collections.quiz, {collectionId: req.params.collectionId, userId: req.user.id, quizLength: 6})
+    db.any(sql.collections.quiz, {
+        collectionId: req.params.collectionId,
+        userId: req.user.id,
+        quizLength: parseInt(req.query.length)
+    })
         .then(exercises => _.map(exercises, exercise => exerciseService.process(exercise)))
         .then(exercises => res.status(200).send(exercises))
         .catch(err =>
