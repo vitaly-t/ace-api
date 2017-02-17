@@ -2,16 +2,12 @@ const
     GRAPH_URL = 'https://graph.facebook.com',
     express = require('express'),
     router = express.Router(),
-    batch = require('batch-request')({
-        max: 100
-    }),
     db = require('db'),
     sql = require('../services/sql'),
     superagent = require('superagent-as-promised')(require('superagent')),
     jwt = require('jsonwebtoken'),
     uuid = require('uuid');
 
-router.post('/batch', batch.validate, batch);
 
 router.get('/anonymous', (req, res) => {
     res.send({uuid: uuid.v1()})
