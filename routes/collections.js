@@ -17,7 +17,7 @@ router.get('/:collectionId/quiz', authentication(true), (req, res) => {
         quizLength: parseInt(req.query.length) || 6
     })
         .then(exercises =>
-            quizService.process(exercises, 2))
+            quizService.process(exercises, 10,1))
             // _.map(exercises, exercise => exerciseService.process(exercise, parseInt(req.query.max_alts) || 4)))
         .then(exercises => res.status(200).send(exercises))
         .catch(err =>
