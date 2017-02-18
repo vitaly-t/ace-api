@@ -19,7 +19,8 @@ const processTF = (exercise) => ({
     alternatives: [
         {text: 'True', correct: exercise.content.correct.answer},
         {text: 'False', correct: !exercise.content.correct.answer}],
-    answer_status: exercise.answer_status
+    answer_status: exercise.answer_status,
+    approved: exercise.approved
 });
 
 const processMC = (exercise, maxAlts) => {
@@ -33,7 +34,10 @@ const processMC = (exercise, maxAlts) => {
         type: exercise.type,
         question: {text: exercise.content.question.text},
         alternatives: shuffledAlternatives,
-        answer_status: exercise.answer_status
+        answer_status: exercise.answer_status,
+        approved: exercise.approved,
+        meAnswers: exercise.me_answers,
+        allAnswers: exercise.all_answers
     }
 };
 

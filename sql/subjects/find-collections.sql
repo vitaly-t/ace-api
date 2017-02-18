@@ -1,4 +1,6 @@
-select *
+select collections.*, count(exercises.id) as size
 from collections
+join exercises on collection_id=collections.id
 where subject_id = ${subjectId}
-order by position asc, id desc
+group by collections.id
+order by collections.position asc, collections.id desc
