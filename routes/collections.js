@@ -5,9 +5,18 @@ const
     authentication = require('../middleware/user-authentication'),
     db = require('db'),
     quizService = require('../services/quiz-service'),
+    exercisesService = require('../services/exercises-service'),
     sql = require('../services/sql');
 
 
+router.get('/:collectionId/exercises', (req, res) => {
+    db.any(sql.collections.findExercises, { collectionId: req.params.collectionId })
+        .then(exercises =>
+            _.map(exercises, exercise => exercisesService.process(exercise, req.query.maxAlts || 4)))
+        .then(exercises => res.status(200).send(exercises))
+        .catch(err =>
+            res.status(500).send({err}));
+});
 
 router.get('/:collectionId/quiz', authentication(true), (req, res) => {
     db.any(sql.collections.quiz, {
