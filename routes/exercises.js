@@ -35,7 +35,7 @@ router.post('/:exerciseId/reports', [bodyValidation({
         });
 });
 
-router.post('/:exerciseId/answer', authentication(true), (req, res) =>
+router.post('/:exerciseId/answers', authentication(true), (req, res) =>
     db.none(sql.exercises.answer, {
         answerStatus: req.body.answer_status,
         userId: req.user.id,
