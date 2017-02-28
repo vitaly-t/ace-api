@@ -4,7 +4,6 @@ const
     _ = require('underscore'),
     authentication = require('../middleware/user-authentication'),
     db = require('db'),
-    exerciseService = require('../services/exercises-service'),
     quizService = require('../services/quiz-service'),
     sql = require('../services/sql');
 
@@ -13,12 +12,10 @@ const
 router.get('/:collectionId/quiz', authentication(true), (req, res) => {
     db.any(sql.collections.quiz, {
         collectionId: req.params.collectionId,
-        userId: req.user.id,
-        quizLength: parseInt(req.query.length) || 6
+        userId: req.user.id
     })
         .then(exercises =>
-            quizService.process(exercises, 10,1))
-            // _.map(exercises, exercise => exerciseService.process(exercise, parseInt(req.query.max_alts) || 4)))
+            quizService.create(exercises, parseInt(req.query.size) || 6, parseInt(req.query.max_alts) || 1))
         .then(exercises => res.status(200).send(exercises))
         .catch(err =>
             res.status(500).send({err}));

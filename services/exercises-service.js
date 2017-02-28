@@ -36,8 +36,11 @@ const processMC = (exercise, maxAlts) => {
         alternatives: shuffledAlternatives,
         answer_status: exercise.answer_status,
         approved: exercise.approved,
-        meAnswers: exercise.me_answers,
-        allAnswers: exercise.all_answers
+        c_m: exercise.c_m,
+        w_m: exercise.w_m,
+        c_a: exercise.c_a,
+        w_a: exercise.w_a,
+        status: exercise.status
     }
 };
 

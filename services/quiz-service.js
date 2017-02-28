@@ -2,29 +2,38 @@ const
     _ = require('lodash'),
     exerciseService = require('./exercises-service');
 
-const process = (exs, quizLength, nAlts) => {
-    const d = _.flatten(_.map(exs, ex => ex.me_answers));
-    const correctHistory = _.filter(d, a => a).length;
-    const wrongHistory = _.filter(d, a => !a).length;
-    const scoredExercises = _.map(exs, ex => {
-        const
-            exercise = exerciseService.process(ex, nAlts),
-            c_m = _.filter(ex.me_answers, answer => answer).length,
-            w_m = _.filter(ex.me_answers, answer => !answer).length || c_m || 4,
-            w_a = _.filter(ex.all_answers, answer => !answer).length,
-            c_a = _.filter(ex.all_answers, answer => answer).length;
-        // return _.extend(_.omit(exercise, ['meAnswers', 'allAnswers']), {
-        return _.extend(exercise, {
-            difficultyRating: Math.pow(((1 + w_a) / (1 + c_a)) * Math.pow(2, (w_m - c_m)), 1 - (wrongHistory+1)/(wrongHistory + correctHistory + 1))
-        })
-    });
-    const lotteryExercises = _.flatten(_.map(scoredExercises, ex => Array(Math.ceil(ex.difficultyRating)).fill(ex)));
-    const shuffledLotteryExercises = _.shuffle(lotteryExercises);
-    // const uniqueLotteryExercises = shuffledLotteryExercises;
-    const uniqueLotteryExercises = _.uniqBy(shuffledLotteryExercises, 'id');
-    return _.take(uniqueLotteryExercises, quizLength);
+const deduceRelevance = (skillLevel, initialDifficulty) => ex => {
+    const
+        c_m = ex.c_m,
+        w_m = ex.w_m,
+        w_a = ex.w_a,
+        c_a = ex.c_a,
+        subjDifficulty = w_m + c_m > 0 ? Math.pow(2, (w_m - c_m)) : initialDifficulty,
+        objDifficulty = ((1 + w_a) / (1 + w_a + c_a)),
+        difficulty = objDifficulty * subjDifficulty,
+        relevance = Math.pow(difficulty, skillLevel);
+    return _.extend(ex, {
+        difficulty,
+        relevance,
+        skillLevel
+    })
+};
+
+const create = (exs, quizLength, nAlts) => {
+    const
+        exercises = _.map(exs, ex => exerciseService.process(ex, nAlts)),
+        correctHistory = _.reduce(exercises, (sum, ex) => sum + ex.c_m, 0),
+        wrongHistory = _.reduce(exercises, (sum, ex) => sum + ex.w_m, 0),
+        skillLevel = 2 * ((correctHistory / (1 + wrongHistory + correctHistory)) - .5),
+        measuredExercises = _.map(exercises, deduceRelevance(skillLevel, 4)),
+        lotteryIds = _.shuffle(_.flatten(_.map(measuredExercises, ex => Array(Math.ceil(100 * ex.relevance)).fill(ex.id)))),
+        chosenIds = _.uniq(lotteryIds),
+        chosenExercises = _.filter(measuredExercises, ex => _.includes(chosenIds, ex.id));
+
+    //TODO remember to shuffle
+    return _.take(chosenExercises, quizLength);
 };
 
 module.exports = {
-    process
+    create
 };
