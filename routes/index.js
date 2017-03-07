@@ -9,8 +9,34 @@ const
     uuid = require('uuid');
 
 
-router.get('/anonymous', (req, res) => {
-    res.send({uuid: uuid.v1()})
+router.post('/users/anonymous', (req, res) => {
+    const deviceId = req.body.deviceId;
+    if(deviceId)
+        return db.none(sql.users.createAnonymous, {deviceId})
+            .then(() => res.status(201).send())
+            .catch((err) =>
+                res.status(500).send())
+});
+
+router.post('/users/connection', (req, res) => {
+   const
+       deviceId = req.body.deviceId,
+       facebookToken = req.body.facebookToken,
+       username = req.body.username;
+
+    if(facebookToken && deviceId && username)
+        return superagent
+            .get(`${GRAPH_URL}/me?access_token=${facebookToken}`)
+            .then(res => JSON.parse(res.text).id)
+            .then(facebookId =>
+                db.none(sql.users.connectAnonToFace, { username, facebookId, deviceId})
+                    .then(() => res.status(204).send())
+                    .catch((err) =>
+                        res.status(500).send())
+            )
+            .catch(err =>
+                res.status(400).send({err}));
+    res.status(400).send({message: 'Field \'facebook_token\' is required.'});
 });
 
 router.post('/users', (req, res) => {
@@ -33,8 +59,8 @@ router.post('/users', (req, res) => {
 
 router.get('/token', (req, res) => {
     const facebookToken = req.query.facebook_token;
-    const findUserAndAssignToken = (facebookId) => {
-        db.one(sql.users.findOne, {facebookId})
+    const findUserAndAssignToken = (id) => {
+        db.one(sql.users.findOne, { id })
             .then(user => {
                 const token = jwt.sign({ user }, process.env.SECRET, {expiresIn: '30 days'});
                 res.status(200).send({token});
@@ -51,8 +77,7 @@ router.get('/token', (req, res) => {
                 findUserAndAssignToken(facebookId))
             .catch(err => res.status(400).send({err}))
     }
-
-    res.status(401).send();
+    findUserAndAssignToken(req.query.device_id);
 });
 
 module.exports = router;
