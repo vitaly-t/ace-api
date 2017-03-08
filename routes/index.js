@@ -9,54 +9,6 @@ const
     uuid = require('uuid');
 
 
-router.post('/users/anonymous', (req, res) => {
-    const deviceId = req.body.deviceId;
-    if(deviceId)
-        return db.none(sql.users.createAnonymous, {deviceId})
-            .then(() => res.status(201).send())
-            .catch((err) =>
-                res.status(500).send())
-});
-
-router.post('/users/connection', (req, res) => {
-   const
-       deviceId = req.body.deviceId,
-       facebookToken = req.body.facebookToken,
-       username = req.body.username;
-
-    if(facebookToken && deviceId && username)
-        return superagent
-            .get(`${GRAPH_URL}/me?access_token=${facebookToken}`)
-            .then(res => JSON.parse(res.text).id)
-            .then(facebookId =>
-                db.none(sql.users.connectAnonToFace, { username, facebookId, deviceId})
-                    .then(() => res.status(204).send())
-                    .catch((err) =>
-                        res.status(500).send())
-            )
-            .catch(err =>
-                res.status(400).send({err}));
-    res.status(400).send({message: 'Field \'facebook_token\' is required.'});
-});
-
-router.post('/users', (req, res) => {
-    const username = req.body.username;
-    const facebookToken = req.body.facebook_token;
-    if(facebookToken)
-        return superagent
-            .get(`${GRAPH_URL}/me?access_token=${facebookToken}`)
-            .then(res => JSON.parse(res.text).id)
-            .then(facebookId =>
-                db.none(sql.users.create, { username, facebookId})
-                    .then(() => res.status(201).send())
-                    .catch((err) =>
-                        res.status(500).send())
-            )
-            .catch(err =>
-                res.status(400).send({err}));
-    res.status(400).send({message: 'Field \'facebook_token\' is required.'});
-});
-
 router.get('/token', (req, res) => {
     const facebookToken = req.query.facebook_token;
     const findUserAndAssignToken = (id) => {
