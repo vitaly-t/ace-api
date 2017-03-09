@@ -5,14 +5,21 @@ const
     db = require('db'),
     sql = require('../services/sql'),
     bodyValidation = require('body-validation'),
+    morsommeNavn = require('morsomme-navn'),
+    tokenService = require('../services/token-service'),
     superagent = require('superagent-as-promised')(require('superagent'));
 
 router.post('/anonymous', bodyValidation({
         required: ['deviceId'],
         properties: {deviceId: {type: 'string'}}
     }), (req, res) =>
-        db.none(sql.users.createAnonymous, {deviceId: req.body.deviceId})
-            .then(() => res.status(201).send())
+        db.one(sql.users.createAnonymous, {username: morsommeNavn.generate(), deviceId: req.body.deviceId})
+            .then((user) => {
+                tokenService.getToken(req.body.deviceId, (err, token) => {
+                    if (err) return res.status(500).send({message: 'This should never happen'});
+                    res.status(201).send({username: user.username, token})
+                })
+            })
             .catch((err) =>
                 res.status(500).send())
 );
@@ -59,7 +66,7 @@ router.post('/facebook', bodyValidation({
             .then(facebookId =>
                 db.none(sql.users.create, {username: req.body.username, facebookId})
                     .then(() => res.status(201).send())
-                    .catch((err) =>
+                    .catch(err =>
                         res.status(500).send())
             )
             .catch(err =>
