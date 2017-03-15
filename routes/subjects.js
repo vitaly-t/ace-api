@@ -3,8 +3,6 @@ const
     router = express.Router(),
     _ = require('underscore'),
     assert = require('assert'),
-    mixpanel = require('mixpanel').init('88c1f7835742091ce51bd106fef2638e'),
-    crypto = require('crypto'),
     db = require('db'),
     exerciseService = require('../services/exercises-service'),
     sql = require('../services/sql'),
@@ -41,13 +39,12 @@ router.get('/:subjectId/quiz', authentication(true), (req, res) =>
             res.status(500).send({err}))
 );
 
-router.get('/:subjectId/collections', (req, res) => {
-    db.any(sql.subjects.findCollections, {subjectId: req.params.subjectId})
+router.get('/:subjectId/collections', authentication(true), (req, res) =>
+    db.any(sql.subjects.findCollections, {userId: req.user.id, subjectId: req.params.subjectId})
         .then(collections =>
             res.status(200).send(collections))
         .catch(err =>
-            res.status(500).send({err}));
-});
+            res.status(500).send({err})));
 
 router.put('/:subjectId', [authentication(true), bodyValidation({
     required: ['favorite'],
