@@ -59,7 +59,7 @@ router.post('/facebook', bodyValidation({
                 maxLength: 25
             }
         }
-    }, (req, res) =>
+    }), (req, res) =>
         superagent
             .get(`${GRAPH_URL}/me?access_token=${req.body.facebookToken}`)
             .then(res => JSON.parse(res.text).id)
@@ -71,6 +71,6 @@ router.post('/facebook', bodyValidation({
             )
             .catch(err =>
                 res.status(400).send({err}))
-));
+);
 
 module.exports = router;

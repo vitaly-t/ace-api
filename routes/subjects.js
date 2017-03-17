@@ -36,8 +36,7 @@ router.get('/:subjectId/quiz', authentication(true), (req, res) =>
         .then(exercises => _.map(exercises, exercise => exerciseService.process(exercise, parseInt(req.query.max_alts) || 4)))
         .then(exercises => res.status(200).send(exercises))
         .catch(err =>
-            res.status(500).send({err}))
-);
+            res.status(500).send({err})));
 
 router.get('/:subjectId/collections', authentication(true), (req, res) =>
     db.any(sql.subjects.findCollections, {userId: req.user.id, subjectId: req.params.subjectId})
