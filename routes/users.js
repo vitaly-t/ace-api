@@ -6,7 +6,7 @@ const
     sql = require('../services/sql'),
     bodyValidation = require('body-validation'),
     morsommeNavn = require('morsomme-navn'),
-    tokenService = require('../services/token-service'),
+    userService = require('../services/user-service'),
     superagent = require('superagent-as-promised')(require('superagent'));
 
 router.post('/anonymous', bodyValidation({
@@ -14,10 +14,10 @@ router.post('/anonymous', bodyValidation({
         properties: {deviceId: {type: 'string'}}
     }), (req, res) =>
         db.one(sql.users.createAnonymous, {username: morsommeNavn.generate(), deviceId: req.body.deviceId})
-            .then((user) => {
-                tokenService.getToken(req.body.deviceId, (err, token) => {
+            .then(() => {
+                userService.getUser(req.body.deviceId, (err, user) => {
                     if (err) return res.status(500).send({message: 'This should never happen'});
-                    res.status(201).send({username: user.username, token})
+                    res.status(201).send(user)
                 })
             })
             .catch((err) =>
@@ -41,7 +41,13 @@ router.post('/facebook_connection', bodyValidation({
             .then(res => JSON.parse(res.text).id)
             .then(facebookId =>
                 db.none(sql.users.connectAnonToFace, {username: req.body.username, facebookId, deviceId: req.body.deviceId})
-                    .then(() => res.status(204).send())
+                    .then(() =>
+                        userService.getUser(facebookId, (err, user) => {
+                            if (err)
+                                return res.status(500).send({message: 'This should never happen'});
+                            res.status(201).send(user)
+                        })
+                    )
                     .catch((err) =>
                         res.status(500).send())
             )
@@ -65,7 +71,13 @@ router.post('/facebook', bodyValidation({
             .then(res => JSON.parse(res.text).id)
             .then(facebookId =>
                 db.none(sql.users.create, {username: req.body.username, facebookId})
-                    .then(() => res.status(201).send())
+                    .then(() => {
+                        userService.getUser(facebookId, (err, user) => {
+                            if (err)
+                                return res.status(500).send({message: 'This should never happen'});
+                            res.status(201).send(user)
+                        })
+                    })
                     .catch(err =>
                         res.status(500).send())
             )

@@ -9,7 +9,7 @@ const
     bodyValidation = require('body-validation'),
     authentication = require('../middleware/user-authentication');
 
-router.get('/', authentication(false), (req, res) =>
+router.get('/', authentication(true), (req, res) =>
     db.any(sql.subjects.findAll, {userId: req.user.id})
         .then(subjects =>
             res.status(200).send(subjects.filter(subject => req.web || !subject.web_only)))

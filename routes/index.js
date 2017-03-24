@@ -3,8 +3,7 @@ const
     express = require('express'),
     router = express.Router(),
     superagent = require('superagent-as-promised')(require('superagent')),
-    uuid = require('uuid'),
-    tokenService = require('../services/token-service');
+    userService = require('../services/user-service');
 
 
 router.get('/token', (req, res) => {
@@ -14,16 +13,16 @@ router.get('/token', (req, res) => {
             .get(`${GRAPH_URL}/me?access_token=${facebookToken}`)
             .then(res => JSON.parse(res.text).id)
             .then(facebookId =>
-                tokenService.getToken(facebookId, (err, token) => {
+                userService.getUser(facebookId, (err, user) => {
                         if (err) return res.status(404).send({message: 'User not found'})
-                        res.status(200).send({token});
+                        res.status(200).send(user);
                     }
                 ))
             .catch(err => res.status(400).send({err}))
     }
-    tokenService.getToken(req.query.device_id, (err, token) => {
+    userService.getUser(req.query.device_id, (err, user) => {
         if (err) return res.status(404).send({message: 'User not found'})
-        res.status(200).send({token});
+        res.status(200).send(user);
     })
 });
 
