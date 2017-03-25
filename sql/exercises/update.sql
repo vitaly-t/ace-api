@@ -4,8 +4,8 @@
 
 
 update exercises
-    set type = ${type},
-        content = ${content},
+    set content = ${content},
         upvotes = 5,
-        updated_by = ${userId}
-where id = ${exerciseId};
+        updated_by = ${userId},
+        is_feasible = ${isFeasible}
+where id = ${id};

@@ -2,6 +2,8 @@ const
     express = require('express'),
     router = express.Router(),
     _ = require('underscore'),
+    Ajv = require('ajv'),
+    ajv = new Ajv(),
     exerciseService = require('../services/exercises-service'),
     bodyValidation = require('body-validation'),
     authentication = require('../middleware/user-authentication'),
@@ -47,10 +49,14 @@ router.post('/:exerciseId/answers', authentication(true), (req, res) =>
         )
 );
 
-router.put('/:exerciseId', authentication(true), (req, res) => {
-    req.body.exerciseId = req.params.exerciseId;
-    req.body.userId = req.user.id;
-    db.none(sql.exercises.update, req.body)
+router.put('/:exerciseId', [authentication(true), bodyValidation(exerciseService.validExerciseSchema)], (req, res) => {
+    const content = req.body;
+    const exercise = {content};
+    exercise.id = req.params.exerciseId;
+    exercise.isFeasible = ajv.validate(exerciseService.feasibleExerciseSchema, content);
+    exercise.userId = req.user.id;
+
+    db.none(sql.exercises.update, exercise)
         .then(() => res.status(204).send())
         .catch(err => {
             res.status(500).send({err})

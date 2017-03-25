@@ -47,6 +47,49 @@ const processMC = (exercise, maxAlts) => {
     }
 };
 
+const validExerciseSchema = {
+    required: ['question', 'answers', 'type'],
+    properties: {
+        type: {enum: ['mc']},
+        question: {type: 'string'},
+        answers: {
+            type: 'array',
+            maxItems: 3,
+            items: {
+                type: 'object',
+                required: ['correct', 'text'],
+                properties: {
+                    correct: {type: 'boolean'},
+                    text: {type: 'string'}
+                }
+            }
+        }
+    }
+};
+
+const feasibleExerciseSchema = {
+    required: ['question', 'answers', 'type'],
+    properties: {
+        type: {enum: ['mc']},
+        question: {type: 'string'},
+        answers: {
+            type: 'array',
+            minItems: 3,
+            maxItems: 3,
+            items: {
+                type: 'object',
+                required: ['correct', 'text'],
+                properties: {
+                    correct: {type: 'boolean'},
+                    text: {type: 'string'}
+                }
+            }
+        }
+    }
+};
+
 module.exports = {
+    validExerciseSchema,
+    feasibleExerciseSchema,
     process
 };
