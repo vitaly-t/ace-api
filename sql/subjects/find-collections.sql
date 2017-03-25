@@ -1,6 +1,7 @@
 select
     collections.*,
-    count(exercises.id) as size,
+    count(case when exercises.is_feasible then 1 end) as feasible,
+    count(case when not exercises.is_feasible then 1 end) as non_feasible,
     count(a) as correctly_answered
 from collections
     join exercises on collection_id=collections.id
