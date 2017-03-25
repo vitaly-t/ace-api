@@ -5,8 +5,8 @@ const
     _ = require('lodash'),
     jwt = require('jsonwebtoken');
 
-const getUser = (id, callback) =>
-    db.one(sql.users.findOne, { id })
+const getUser = (facebookIdOrDeviceId, callback) =>
+    db.one(sql.users.findOne, { id: facebookIdOrDeviceId })
         .then(user => {
             const token = jwt.sign({ user }, process.env.SECRET, {expiresIn: '30 days'});
             callback(null, _.extend({ user }, {token}));

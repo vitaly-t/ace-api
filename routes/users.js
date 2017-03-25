@@ -9,19 +9,28 @@ const
     userService = require('../services/user-service'),
     superagent = require('superagent-as-promised')(require('superagent'));
 
+const findValidUsername = (username, callback) =>
+    db.none('select * from users where username=${username}', {username})
+        .then(() =>
+            callback(null, username))
+        .catch((err) =>
+            findValidUsername(username + Math.floor(Math.random() * 10), callback));
+
 router.post('/anonymous', bodyValidation({
         required: ['deviceId'],
         properties: {deviceId: {type: 'string'}}
-    }), (req, res) =>
-        db.one(sql.users.createAnonymous, {username: morsommeNavn.generate(), deviceId: req.body.deviceId})
-            .then(() => {
-                userService.getUser(req.body.deviceId, (err, user) => {
-                    if (err) return res.status(500).send({message: 'This should never happen'});
-                    res.status(201).send(user)
+    }), (req, res) => {
+        findValidUsername(morsommeNavn.generate(), (err, username) =>
+            db.one(sql.users.createAnonymous, {username, deviceId: req.body.deviceId})
+                .then(() => {
+                    userService.getUser(req.body.deviceId, (err, user) => {
+                        if (err) return res.status(500).send({message: 'This should never happen'});
+                        res.status(201).send(user)
+                    })
                 })
-            })
-            .catch((err) =>
-                res.status(500).send())
+                .catch((err) =>
+                    res.status(500).send()))
+    }
 );
 
 router.post('/facebook_connection', bodyValidation({
