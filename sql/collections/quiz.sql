@@ -11,6 +11,6 @@ from exercises
 left join exercise_is_approved on exercises.id = exercise_id
 left join answers a on exercises.id = a.exercise_id
 left join user_likes_exercise on exercises.id = user_likes_exercise.exercise_id and user_likes_exercise.user_id = ${userId}
-where collection_id=${collectionId} and exercises.relevance >= -1 and (disapproved is null or not disapproved)
+where collection_id=${collectionId} and (disapproved is null or not disapproved)
 group by exercises.id, approved, user_likes_exercise.user_credibility
 order by random()
