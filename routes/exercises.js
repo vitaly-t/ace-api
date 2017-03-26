@@ -66,11 +66,11 @@ router.put('/:exerciseId', [authentication(true), bodyValidation(exerciseService
 router.post('/:exerciseId/votes', authentication(true), (req, res) => {
     db.one(sql.users.relevance, {userId: req.user.id})
         .then(row => {
-            const n = row.approved + row.disapproved;
-            const r = row.approved / (row.approved + row.disapproved + 1);
-            const k = 1 / 2;
-            const credibility = k * (n / (n + 1)) * r ^ 2;
-            db.none(sql.exercises.vote, {exerciseId: req.params.exerciseId, vote: req.body.upvote ? credibility : - credibility})
+            const n = row.approved + row.disapproved + 1;
+            const r = (row.approved + 1) / (n+1);
+            const k = 3;
+            const credibility = k * (n / (n + 1)) * Math.pow(r,2);
+            db.none(sql.exercises.vote, {userId: req.user.id, exerciseId: req.params.exerciseId, userCredibility: req.body.upvote ? credibility : - credibility})
                 .then(() => res.status(201).send())
                 .catch(err =>
                     res.status(500).send({err}))

@@ -22,7 +22,7 @@ module.exports = {
         update:             sql('../sql/exercises/update.sql'),
         answer:             sql('../sql/exercises/answer.sql'),
         findOne:             sql('../sql/exercises/find-one.sql'),
-        vote:             sql('../sql/exercises/vote.sql')
+        vote:             sql('../sql/exercises/like.sql')
     },
     reports: {
         insert:             sql('../sql/reports/insert.sql')
