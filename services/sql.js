@@ -34,6 +34,7 @@ module.exports = {
     },
     users: {
         findOne:             sql('../sql/users/find-one.sql'),
+        relevance:             sql('../sql/users/relevance.sql'),
         create:             sql('../sql/users/create.sql'),
         createAnonymous:             sql('../sql/users/create-anonymous.sql'),
         connectAnonToFace:             sql('../sql/users/connect-anon-to-face.sql')

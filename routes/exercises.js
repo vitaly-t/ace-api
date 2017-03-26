@@ -63,12 +63,19 @@ router.put('/:exerciseId', [authentication(true), bodyValidation(exerciseService
         });
 });
 
-router.post('/:exerciseId/votes', authentication(true), (req, res) =>
-    db.none(sql.exercises.vote, { exerciseId: req.params.exerciseId, vote: req.body.upvote ? 1 : -1 })
-        .then(() => res.status(201).send())
-        .catch(err =>
-            res.status(500).send({err}))
-);
+router.post('/:exerciseId/votes', authentication(true), (req, res) => {
+    db.one(sql.users.relevance, {userId: req.user.id})
+        .then(row => {
+            const n = row.approved + row.disapproved;
+            const r = row.approved / (row.approved + row.disapproved + 1);
+            const k = 1 / 2;
+            const credibility = k * (n / (n + 1)) * r ^ 2;
+            db.none(sql.exercises.vote, {exerciseId: req.params.exerciseId, vote: req.body.upvote ? credibility : - credibility})
+                .then(() => res.status(201).send())
+                .catch(err =>
+                    res.status(500).send({err}))
+        })
+});
 
 router.post('/:exerciseId/comments', authentication(true), (req, res) => {
     const comment = req.body;
