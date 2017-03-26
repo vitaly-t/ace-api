@@ -21,15 +21,11 @@ router.get('/:exerciseId', (req, res) =>
 
 router.post('/:exerciseId/reports', [bodyValidation({
     type: 'object',
-    required: ['message', 'device'],
-    properties: {
-        message: {type: 'string'},
-        device: {type: 'string'},
-        email: {type: 'string'}
-    }
+    required: ['message'],
+    properties: { message: {type: 'string'} }
 })], (req, res) => {
     req.body.exerciseId = req.params.exerciseId;
-    db.one(sql.reports.insert, req.body)
+    db.one(sql.reports.insert, { exerciseId: req.params.exerciseId, userId: req.user.id, message: req.body.message})
         .then(result => result.id)
         .then((insertedId) => res.status(201).send({insertedId}))
         .catch(err => {
@@ -37,7 +33,11 @@ router.post('/:exerciseId/reports', [bodyValidation({
         });
 });
 
-router.post('/:exerciseId/answers', authentication(true), (req, res) =>
+router.post('/:exerciseId/answers', [authentication(true), bodyValidation({
+    type: 'object',
+    required: ['answer_status'],
+    properties: { answer_status: {type: 'boolean'} }
+})], (req, res) =>
     db.none(sql.exercises.answer, {
         answerStatus: req.body.answer_status,
         userId: req.user.id,
@@ -63,21 +63,29 @@ router.put('/:exerciseId', [authentication(true), bodyValidation(exerciseService
         });
 });
 
-router.post('/:exerciseId/votes', authentication(true), (req, res) => {
+router.post('/:exerciseId/votes', [authentication(true), bodyValidation({
+    type: 'object',
+    required: ['positive'],
+    properties: { positive: {type: 'boolean'} }
+})], (req, res) => {
     db.one(sql.users.relevance, {userId: req.user.id})
         .then(row => {
             const n = row.approved + row.disapproved + 1;
             const r = (row.approved + 1) / (n+1);
             const k = 3;
             const credibility = k * (n / (n + 1)) * Math.pow(r,2);
-            db.none(sql.exercises.vote, {userId: req.user.id, exerciseId: req.params.exerciseId, userCredibility: req.body.upvote ? credibility : - credibility})
+            db.none(sql.exercises.vote, {userId: req.user.id, exerciseId: req.params.exerciseId, userCredibility: req.body.positive ? credibility : - credibility})
                 .then(() => res.status(201).send())
                 .catch(err =>
                     res.status(500).send({err}))
         })
 });
 
-router.post('/:exerciseId/comments', authentication(true), (req, res) => {
+router.post('/:exerciseId/comments', [authentication(true),bodyValidation({
+    type: 'object',
+    required: ['message'],
+    properties: { message: {type: 'string'} }
+})], (req, res) => {
     const comment = req.body;
     db.none(sql.comments.create, {userId: req.user.id, exerciseId: req.params.exerciseId, message: comment.message})
         .then(() => res.status(204).send())

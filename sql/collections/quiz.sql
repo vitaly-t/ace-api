@@ -1,6 +1,6 @@
 select
     exercises.*,
-    (case when approved is true then true else false end) as approved,
+    (case when approved is true then true else false end) as is_approved,
     (case when user_credibility is null then false else true end) as has_liked,
     bool_or(case when a.user_id = ${userId} and a.status = true then true else false end) as status,
     count(case when a.user_id = ${userId} and a.status = true then 1 end) as c_m,
