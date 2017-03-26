@@ -1,8 +1,8 @@
 const
-    _ = require('underscore');
+    _ = require('lodash');
 
 const process = (exercise, maxAlts) => {
-    switch (exercise.type) {
+    switch (exercise.content.type) {
         case 'tf':
             return processTF(exercise);
         case 'mc':
@@ -12,47 +12,24 @@ const process = (exercise, maxAlts) => {
     }
 };
 
-const processTF = (exercise) => ({
-    id: exercise.id,
-    type: exercise.type,
-    question: {text: exercise.content.question.text},
-    alternatives: [
-        {text: 'True', correct: exercise.content.correct.answer},
-        {text: 'False', correct: !exercise.content.correct.answer}],
-    approved: exercise.approved,
-    c_m: exercise.c_m,
-    w_m: exercise.w_m,
-    c_a: exercise.c_a,
-    w_a: exercise.w_a,
-    status: exercise.status
-});
+const processTF = (exercise) => {
+    exercise.content.alternatives =
+        [{text: 'True', correct: exercise.content.correct.answer},
+        {text: 'False', correct: !exercise.content.correct.answer}]
+    return exercise;
+};
 
-const processMC = (exercise, maxAlts) => {
-    corrects = _.map(exercise.content.corrects, correctAlt => _.extend(correctAlt, {correct: true}));
-    wrongs = _.map(exercise.content.wrongs, wrongAlt => _.extend(wrongAlt, {correct: false}));
-    alternatives = _.take(_.map(corrects.concat(wrongs), alt => ({text: alt.answer, correct: alt.correct})), maxAlts);
-    shuffledAlternatives = _.shuffle(alternatives);
-
-    return {
-        id: exercise.id,
-        type: exercise.type,
-        question: {text: exercise.content.question.text},
-        alternatives: shuffledAlternatives,
-        approved: exercise.approved,
-        c_m: exercise.c_m,
-        w_m: exercise.w_m,
-        c_a: exercise.c_a,
-        w_a: exercise.w_a,
-        status: exercise.status
-    }
+const processMC = (exercise) => {
+    exercise.content.alternatives = _.shuffle(exercise.content.alternatives);
+    return exercise;
 };
 
 const validExerciseSchema = {
-    required: ['question', 'answers', 'type'],
+    required: ['question', 'alternatives', 'type'],
     properties: {
         type: {enum: ['mc']},
-        question: {type: 'string'},
-        answers: {
+        question: { required: ['text'], properties: { text: {type: 'string'}}},
+        alternatives: {
             type: 'array',
             maxItems: 3,
             items: {
@@ -68,11 +45,11 @@ const validExerciseSchema = {
 };
 
 const feasibleExerciseSchema = {
-    required: ['question', 'answers', 'type'],
+    required: ['question', 'alternatives', 'type'],
     properties: {
         type: {enum: ['mc']},
-        question: {type: 'string'},
-        answers: {
+        question: { required: ['text'], properties: { text: {type: 'string'}}},
+        alternatives: {
             type: 'array',
             minItems: 3,
             maxItems: 3,
