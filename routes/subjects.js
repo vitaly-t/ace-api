@@ -9,6 +9,23 @@ const
     bodyValidation = require('body-validation'),
     authentication = require('../middleware/user-authentication');
 
+
+router.post('/', authentication(true), (req, res) =>
+    db.one('insert into subjects (code, name, published, color) values (${code}, ${name}, \'yes\', ${color}) returning id', req.body)
+        .then(row =>
+            res.status(201).send(row))
+        .catch(err =>
+            res.status(500).send({err}))
+);
+
+router.post('/:subjectId/collections', authentication(true), (req, res) =>
+    db.one('insert into collections (name, subject_id) values (${name},${subjectId}) returning id', {name: req.body.name, subjectId: req.params.subjectId})
+        .then(row =>
+            res.status(201).send(row))
+        .catch(err =>
+            res.status(500).send({err}))
+);
+
 router.get('/', authentication(true), (req, res) =>
     db.any(sql.subjects.findAll, {userId: req.user.id})
         .then(subjects =>

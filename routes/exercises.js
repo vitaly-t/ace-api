@@ -71,9 +71,8 @@ router.post('/:exerciseId/votes', [authentication(true), bodyValidation({
     db.one(sql.users.relevance, {userId: req.user.id})
         .then(row => {
             const n = row.approved + row.disapproved + 1;
-            const r = (row.approved + 1) / (n+1);
-            const k = 3;
-            const credibility = k * (n / (n + 1)) * Math.pow(r,2);
+            const k = 0.7;
+            const credibility = k * (row.approved + 1) / (n+1) * Math.pow(1.2, row.approved - row.disapproved);
             db.none(sql.exercises.vote, {userId: req.user.id, exerciseId: req.params.exerciseId, userCredibility: req.body.positive ? credibility : - credibility})
                 .then(() => res.status(201).send())
                 .catch(err =>
