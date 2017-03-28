@@ -30,8 +30,7 @@ const create = (exs, quizLength, nAlts) => {
         chosenIds = _.uniq(lotteryIds),
         chosenExercises = _.filter(measuredExercises, ex => _.includes(chosenIds, ex.id));
 
-    //TODO remember to shuffle
-    return _.take(chosenExercises, quizLength);
+    return _.union(_.take(chosenExercises, quizLength), [{ id: 0, is_feasible: false, content: { type: 'mc', question: '', alternatives: [] }}]);
 };
 
 module.exports = {
