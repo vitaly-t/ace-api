@@ -42,7 +42,7 @@ router.get('/:subjectId', authentication(false), (req, res) =>
         .then(subject =>
             db.any(sql.subjects.findCollections, {userId: req.user.id, subjectId: req.params.subjectId})
                 .then(collections =>
-                    res.status(200).send(_.extend(subject, {collections}))))
+                    res.status(200).send(_.extend(subject, {collections, description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam ornare sapien nec velit tincidunt, a sodales neque congue. Etiam ac lorem amet.'}))))
                 .catch(err =>
                     res.status(500).send({message: 'Could not fetch collections', err}))
         .catch(err =>
