@@ -19,7 +19,7 @@ const deduceRelevance = (skillLevel, initialDifficulty) => ex => {
     })
 };
 
-const create = (exs, quizLength, nAlts) => {
+const create = (collectionId, exs, quizLength, nAlts) => {
     const
         exercises = _.map(exs, ex => exerciseService.process(ex, nAlts)),
         correctHistory = _.reduce(exercises, (sum, ex) => sum + ex.c_m, 0),
@@ -30,7 +30,7 @@ const create = (exs, quizLength, nAlts) => {
         chosenIds = _.uniq(lotteryIds),
         chosenExercises = _.filter(measuredExercises, ex => _.includes(chosenIds, ex.id));
 
-    return _.union(_.take(chosenExercises, quizLength), [{ id: 0, is_feasible: false, content: { type: 'mc', question: '', alternatives: [] }}]);
+    return _.union(_.take(chosenExercises, quizLength), [{ id: 0, collection_id: collectionId, is_feasible: false, content: { type: 'mc', question: '', alternatives: [] }}]);
 };
 
 module.exports = {
