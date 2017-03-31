@@ -9,6 +9,7 @@ const
 
 module.exports = {
     subjects: {
+        findPopularCollections: sql('../sql/subjects/find-popular-collections.sql'),
         findById: sql('../sql/subjects/find-by-id.sql'),
         findAll:            sql('../sql/subjects/find-all.sql'),
         update:             sql('../sql/subjects/update.sql'),
