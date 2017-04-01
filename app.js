@@ -24,6 +24,7 @@ app.use('/subjects', require('./routes/subjects'));
 app.use('/collections', require('./routes/collections'));
 app.use('/exercises', require('./routes/exercises'));
 app.use('/users', require('./routes/users'));
+app.use('/answers', require('./routes/answers'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res) {
