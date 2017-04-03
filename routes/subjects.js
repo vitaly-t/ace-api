@@ -3,7 +3,6 @@ const express = require('express'),
   _ = require('underscore'),
   assert = require('assert'),
   db = require('db'),
-  exerciseService = require('../services/exercises-service'),
   sql = require('../services/sql'),
   bodyValidation = require('body-validation'),
   authentication = require('../middleware/user-authentication');

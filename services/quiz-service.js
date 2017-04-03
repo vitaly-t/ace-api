@@ -20,7 +20,7 @@ const deduceRelevance = (skillLevel, initialDifficulty) =>
   };
 
 const create = (collectionId, exs, quizLength, nAlts) => {
-  const exercises = _.map(_.filter(exs, ex => ex.is_feasible), ex => exerciseService.process(ex, nAlts)),
+  const exercises = _.map(_.filter(exs, ex => ex.is_feasible), ex => exerciseService.process(ex, nAlts || 3)),
     correctHistory = _.reduce(exercises, (sum, ex) => sum + ex.c_m, 0),
     wrongHistory = _.reduce(exercises, (sum, ex) => sum + ex.w_m, 0),
     skillLevel = 2 *
