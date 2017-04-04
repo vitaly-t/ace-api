@@ -1,0 +1,1 @@
+select * from collections where id=${id}

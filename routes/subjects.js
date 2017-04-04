@@ -37,12 +37,35 @@ router.get('/', authentication(true), (req, res) =>
         .send(subjects.filter(subject => req.web || !subject.web_only)))
     .catch(err => res.status(500).send({ err })));
 
+router.get('/default', authentication(false), (req, res) =>
+  db
+    .one(sql.subjects.findById, {
+      subjectId: process.env.DEFAULT_SUBJECT_ID,
+      userId: req.user.id
+    })
+    .then(subject =>
+      db
+        .any(sql.subjects.findCollections, {
+          userId: req.user.id,
+          subjectId: process.env.DEFAULT_SUBJECT_ID
+        })
+        .then(collections => res.status(200).send(
+            _.extend(subject, {
+              collections
+            })
+          ))
+        .catch(err =>
+          res
+            .status(500)
+            .send({ message: 'Could not fetch collections', err })))
+    .catch(err =>
+      res.status(500).send({ message: 'Could not fetch subject', err })));
+
 router.get('/:subjectId', authentication(false), (req, res) =>
   db
     .one(sql.subjects.findById, {
       subjectId: req.params.subjectId,
-      userId: req.user.id,
-      forceShow: false
+      userId: req.user.id
     })
     .then(subject =>
       db
@@ -52,12 +75,13 @@ router.get('/:subjectId', authentication(false), (req, res) =>
         })
         .then(collections => res.status(200).send(
             _.extend(subject, {
-              collections,
-              description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam ornare sapien nec velit tincidunt, a sodales neque congue. Etiam ac lorem amet.'
+              collections
             })
-          )))
-    .catch(err =>
-      res.status(500).send({ message: 'Could not fetch collections', err }))
+          ))
+        .catch(err =>
+          res
+            .status(500)
+            .send({ message: 'Could not fetch collections', err })))
     .catch(err =>
       res.status(500).send({ message: 'Could not fetch subject', err })));
 
