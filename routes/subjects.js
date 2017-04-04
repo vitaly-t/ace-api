@@ -38,28 +38,7 @@ router.get('/', authentication(true), (req, res) =>
     .catch(err => res.status(500).send({ err })));
 
 router.get('/default', authentication(false), (req, res) =>
-  db
-    .one(sql.subjects.findById, {
-      subjectId: process.env.DEFAULT_SUBJECT_ID,
-      userId: req.user.id
-    })
-    .then(subject =>
-      db
-        .any(sql.subjects.findCollections, {
-          userId: req.user.id,
-          subjectId: process.env.DEFAULT_SUBJECT_ID
-        })
-        .then(collections => res.status(200).send(
-            _.extend(subject, {
-              collections
-            })
-          ))
-        .catch(err =>
-          res
-            .status(500)
-            .send({ message: 'Could not fetch collections', err })))
-    .catch(err =>
-      res.status(500).send({ message: 'Could not fetch subject', err })));
+  res.redirect(`/subjects/${process.env.DEFAULT_SUBJECT_ID}`));
 
 router.get('/:subjectId', authentication(false), (req, res) =>
   db
