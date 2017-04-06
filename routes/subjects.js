@@ -40,7 +40,7 @@ router.get('/', authentication(true), (req, res) =>
 router.get('/default', authentication(false), (req, res) =>
   res.redirect(`/subjects/${process.env.DEFAULT_SUBJECT_ID}`));
 
-router.get('/:subjectId', authentication(false), (req, res) =>
+router.get('/:subjectId', authentication(true), (req, res) =>
   db
     .one(sql.subjects.findById, {
       subjectId: req.params.subjectId,
