@@ -26,7 +26,8 @@ const tournamentSelection = (
   nRounds,
   tournamentSize = 3
 ) => {
-  if (nRounds === 0 || _size(xs) === 0) return winners;
+  if (nRounds === 0 || _.size(xs) === 0) return winners;
+  console.log('ok');
   const winner = _.maxBy(_.sampleSize(xs, tournamentSize), evaluate);
   return tournamentSelection(
     _.pull(xs, winner),
