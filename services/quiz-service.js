@@ -39,7 +39,10 @@ const tournamentSelection = (
 };
 
 const create = (isDaily, collectionId, exs, quizLength, nAlts) => {
-  const exercises = _.map(exs, ex => exerciseService.process(ex, nAlts || 3)),
+  const exercises = _.map(
+    exs,
+    ex => ex.is_feasible ? exerciseService.process(ex, nAlts || 3) : ex
+  ),
     correctHistory = _.reduce(exercises, (sum, ex) => sum + ex.c_m, 0),
     wrongHistory = _.reduce(exercises, (sum, ex) => sum + ex.w_m, 0),
     skillLevel = 2 *
