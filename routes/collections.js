@@ -13,7 +13,7 @@ const express = require('express'),
 router.get('/:collectionId/exercises', (req, res) => {
   db
     .any(sql.collections.findExercises, {
-      collectionId: req.params.collectionId
+      collectionId: req.params.collectionId,
     })
     .then(exercises =>
       _.map(exercises, exercise =>
@@ -25,24 +25,32 @@ router.get('/:collectionId/exercises', (req, res) => {
 router.get('/:collectionId/quiz', authentication(true), (req, res) => {
   db
     .one(sql.collections.findById, {
-      id: req.params.collectionId
+      id: req.params.collectionId,
     })
     .then(collection =>
       db
         .any(sql.collections.quiz, {
           collectionId: req.params.collectionId,
-          userId: req.user.id
+          userId: req.user.id,
+          isDaily: req.query.type === 'daily',
         })
         .then(exercises =>
           quizService.create(
+            req.query.type === 'daily',
             req.params.collectionId,
             exercises,
             parseInt(req.query.size) || 6,
             parseInt(req.query.max_alts) || 3
           ))
         .then(exercises => res.status(200).send({ collection, exercises }))
-        .catch(err => res.status(500).send({ err })))
-    .catch(err => res.status(500).send({ err }));
+        .catch(err => {
+          console.log(err);
+          res.status(500).send({ err });
+        }))
+    .catch(err => {
+      console.log(err);
+      res.status(500).send({ err });
+    });
 });
 
 router.post(

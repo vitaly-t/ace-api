@@ -16,12 +16,16 @@ const process = (exercise, maxAlts) => {
 const processTF = exercise => {
   exercise.content.alternatives = [
     { text: 'True', correct: exercise.content.correct },
-    { text: 'False', correct: !exercise.content.correct }
+    { text: 'False', correct: !exercise.content.correct },
   ];
   return exercise;
 };
 
 const processMC = (exercise, maxAlts) => {
+  exercise.content.alternatives = _.filter(
+    exercise.content.alternatives,
+    alt => alt
+  );
   exercise.content.alternatives = _.shuffle(
     _.take(
       _.union(
@@ -30,12 +34,16 @@ const processMC = (exercise, maxAlts) => {
             _.shuffle(
               _.filter(exercise.content.alternatives, alt => alt.correct)
             )
-          )
+          ),
         ],
         _.filter(exercise.content.alternatives, alt => !alt.correct)
       ),
       maxAlts
     )
+  );
+  exercise.content.alternatives = _.filter(
+    exercise.content.alternatives,
+    alt => alt
   );
   return exercise;
 };
@@ -53,11 +61,11 @@ const validExerciseSchema = {
         required: ['correct', 'text'],
         properties: {
           correct: { type: 'boolean' },
-          text: { type: 'string' }
-        }
-      }
-    }
-  }
+          text: { type: 'string' },
+        },
+      },
+    },
+  },
 };
 
 const feasibleExerciseSchema = {
@@ -74,15 +82,15 @@ const feasibleExerciseSchema = {
         required: ['correct', 'text'],
         properties: {
           correct: { type: 'boolean' },
-          text: { type: 'string' }
-        }
-      }
-    }
-  }
+          text: { type: 'string' },
+        },
+      },
+    },
+  },
 };
 
 module.exports = {
   validExerciseSchema,
   feasibleExerciseSchema,
-  process
+  process,
 };

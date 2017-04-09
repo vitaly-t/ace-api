@@ -38,9 +38,8 @@ const tournamentSelection = (
   );
 };
 
-const create = (collectionId, exs, quizLength, nAlts) => {
-  const exercises = _.map(_.filter(exs, ex => ex.is_feasible), ex =>
-    exerciseService.process(ex, nAlts || 3)),
+const create = (isDaily, collectionId, exs, quizLength, nAlts) => {
+  const exercises = _.map(exs, ex => exerciseService.process(ex, nAlts || 3)),
     correctHistory = _.reduce(exercises, (sum, ex) => sum + ex.c_m, 0),
     wrongHistory = _.reduce(exercises, (sum, ex) => sum + ex.w_m, 0),
     skillLevel = 2 *
@@ -60,8 +59,22 @@ const create = (collectionId, exs, quizLength, nAlts) => {
     _.map(chosenExercises, ex => ({ id: ex.id, relevance: ex.relevance }))
   );
 
-  return _.take(chosenExercises, quizLength);
-  // return _.union(_.take(chosenExercises, quizLength), [{ id: 0, collection_id: collectionId, is_feasible: false, content: { type: 'mc', question: '', alternatives: [] }}]);
+  const p = _.size(exs) <= 17 ? 1 - 0.003 * Math.pow(_.size(exs), 2) : 0.10;
+  console.log(p);
+  const r = _.random(1, true);
+  console.log(r);
+  const newExercises = r <= p && !isDaily
+    ? [
+        {
+          id: 0,
+          collection_id: collectionId,
+          is_feasible: false,
+          content: { type: 'mc', question: { text: '' }, alternatives: [] },
+        },
+      ]
+    : [];
+
+  return _.union(_.shuffle(_.take(chosenExercises, quizLength)), newExercises);
 };
 
 module.exports = {
