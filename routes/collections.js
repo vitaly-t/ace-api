@@ -66,8 +66,19 @@ router.post(
     exercise.collectionId = req.params.collectionId;
     exercise.userId = req.user.id;
     db
-      .any(sql.collections.insertExercise, exercise)
-      .then(() => res.status(201).send({}))
+      .one(sql.collections.insertExercise, exercise)
+      .then(exercise =>
+        db
+          .none(sql.exercises.vote, {
+            userId: req.user.id,
+            exerciseId: exercise.id,
+            positive: 1,
+          })
+          .then(() => res.status(201).send())
+          .catch(err => {
+            console.log(err);
+            res.status(500).send({ err });
+          }))
       .catch(err => res.status(500).send({ err }));
   }
 );

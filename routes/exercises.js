@@ -80,8 +80,20 @@ router.put(
 
     db
       .none(sql.exercises.update, exercise)
-      .then(() => res.status(204).send())
+      .then(() =>
+        db
+          .none(sql.exercises.vote, {
+            userId: req.user.id,
+            exerciseId: exercise.id,
+            positive: 1,
+          })
+          .then(() => res.status(201).send())
+          .catch(err => {
+            console.log(err);
+            res.status(500).send({ err });
+          }))
       .catch(err => {
+        console.log(err);
         res.status(500).send({ err });
       });
   }
@@ -97,7 +109,7 @@ router.post(
       properties: { positive: { type: 'boolean' } },
     }),
   ],
-  (req, res) => {
+  (req, res) =>
     db
       .none(sql.exercises.vote, {
         userId: req.user.id,
@@ -108,8 +120,7 @@ router.post(
       .catch(err => {
         console.log(err);
         res.status(500).send({ err });
-      });
-  }
+      })
 );
 
 router.post(
