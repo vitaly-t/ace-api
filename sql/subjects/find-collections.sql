@@ -4,7 +4,7 @@ select
     count(case when not exercises.is_feasible then 1 end) as non_feasible,
     count(a) as correctly_answered
 from collections
-    join exercises on collection_id=collections.id
+    left join exercises on collection_id=collections.id
     left join
        (select distinct user_id, exercise_id from answers where status = true) as a
        on exercise_id=exercises.id and user_id=${userId}
