@@ -85,7 +85,7 @@ router.put(
           .none(sql.exercises.vote, {
             userId: req.user.id,
             exerciseId: exercise.id,
-            positive: 1,
+            positive: true,
           })
           .then(() => res.status(201).send())
           .catch(err => {
@@ -114,7 +114,7 @@ router.post(
       .none(sql.exercises.vote, {
         userId: req.user.id,
         exerciseId: req.params.exerciseId,
-        positive: req.body.positive ? 1 : -1,
+        positive: req.body.positive,
       })
       .then(() => res.status(201).send())
       .catch(err => {

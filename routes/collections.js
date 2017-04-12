@@ -72,7 +72,7 @@ router.post(
           .none(sql.exercises.vote, {
             userId: req.user.id,
             exerciseId: exercise.id,
-            positive: 1,
+            positive: true,
           })
           .then(() => res.status(201).send())
           .catch(err => {
