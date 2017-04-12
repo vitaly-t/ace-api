@@ -17,10 +17,10 @@ router.post(
         required: ['exerciseId', 'isCorrect'],
         properties: {
           exerciseId: { type: 'integer' },
-          isCorrect: { type: 'boolean' }
-        }
-      }
-    })
+          isCorrect: { type: 'boolean' },
+        },
+      },
+    }),
   ],
   (req, res) =>
     db
