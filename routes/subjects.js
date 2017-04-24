@@ -35,7 +35,10 @@ router.get('/', authentication(true), (req, res) =>
       res
         .status(200)
         .send(subjects.filter(subject => req.web || !subject.web_only)))
-    .catch(err => res.status(500).send({ err })));
+    .catch(err => {
+      console.log(err);
+      res.status(500).send({ err });
+    }));
 
 router.get('/default', authentication(false), (req, res) =>
   res.redirect(`/subjects/${process.env.DEFAULT_SUBJECT_ID}`));
@@ -61,8 +64,11 @@ router.get('/:subjectId', authentication(true), (req, res) =>
           res
             .status(500)
             .send({ message: 'Could not fetch collections', err })))
-    .catch(err =>
-      res.status(500).send({ message: 'Could not fetch subject', err })));
+    .catch(err => {
+      console.log(process.env.DATABASE_URL);
+      console.log(err);
+      res.status(500).send({ message: 'Could not fetch subject', err });
+    }));
 
 router.get('/:subjectId/quiz', authentication(true), (req, res) =>
   db
