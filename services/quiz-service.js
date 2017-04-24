@@ -61,7 +61,7 @@ const create = (isDaily, collectionId, exs, quizLength, nAlts) => {
     _.map(chosenExercises, ex => ({ id: ex.id, relevance: ex.relevance }))
   );
 
-  const p = _.size(exs) <= 17 ? 1 - 0.003 * Math.pow(_.size(exs), 2) : 0.10;
+  const p = 0.80;
   console.log(p);
   const r = _.random(1, true);
   console.log(r);
