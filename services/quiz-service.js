@@ -61,7 +61,7 @@ const create = (isDaily, collectionId, exs, quizLength, nAlts) => {
     _.map(chosenExercises, ex => ({ id: ex.id, relevance: ex.relevance }))
   );
 
-  const p = parseInt(process.env.CONTRIBUTE_P);
+  const p = parseInt(process.env.CONTRIBUTE_P) || 0;
   console.log(p);
   const r = _.random(1, true);
   console.log(r);
