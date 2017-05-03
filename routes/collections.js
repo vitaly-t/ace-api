@@ -17,7 +17,9 @@ router.get('/:collectionId/exercises', (req, res) => {
     })
     .then(exercises =>
       _.map(exercises, exercise =>
-        exercisesService.process(exercise, req.query.max_alts || 4)))
+        exercisesService.process(exercise, req.query.max_alts || 4)
+      )
+    )
     .then(exercises => res.status(200).send(exercises))
     .catch(err => res.status(500).send({ err }));
 });
@@ -41,12 +43,14 @@ router.get('/:collectionId/quiz', authentication(true), (req, res) => {
             exercises,
             parseInt(req.query.size) || 6,
             parseInt(req.query.max_alts) || 3
-          ))
+          )
+        )
         .then(exercises => res.status(200).send({ collection, exercises }))
         .catch(err => {
           console.log(err);
           res.status(500).send({ err });
-        }))
+        })
+    )
     .catch(err => {
       console.log(err);
       res.status(500).send({ err });
@@ -78,7 +82,8 @@ router.post(
           .catch(err => {
             console.log(err);
             res.status(500).send({ err });
-          }))
+          })
+      )
       .catch(err => {
         console.log(err);
         res.status(500).send({ err });
