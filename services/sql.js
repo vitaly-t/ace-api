@@ -6,7 +6,7 @@ const QueryFile = require('pg-promise').QueryFile,
 
 module.exports = {
   answers: {
-    postAnswers: sql('../sql/answers/post-answers.sql')
+    postAnswers: sql('../sql/answers/post-answers.sql'),
   },
   subjects: {
     findPopularCollections: sql('../sql/subjects/find-popular-collections.sql'),
@@ -17,32 +17,33 @@ module.exports = {
     removeFromFavorites: sql('../sql/subjects/remove-from-favorites.sql'),
     findCollections: sql('../sql/subjects/find-collections.sql'),
     downloadsToday: sql('../sql/subjects/downloads-today.sql'),
-    quiz: sql('../sql/subjects/quiz.sql')
+    quiz: sql('../sql/subjects/quiz.sql'),
+    ranking: sql('../sql/subjects/ranking.sql'),
   },
   exercises: {
     update: sql('../sql/exercises/update.sql'),
     answer: sql('../sql/exercises/answer.sql'),
     findOne: sql('../sql/exercises/find-one.sql'),
-    vote: sql('../sql/exercises/like.sql')
+    vote: sql('../sql/exercises/like.sql'),
   },
   reports: {
-    insert: sql('../sql/reports/insert.sql')
+    insert: sql('../sql/reports/insert.sql'),
   },
   collections: {
     quiz: sql('../sql/collections/quiz.sql'),
     insertExercise: sql('../sql/collections/insert-exercise.sql'),
     findExercises: sql('../sql/collections/find-exercises.sql'),
-    findById: sql('../sql/collections/find-by-id.sql')
+    findById: sql('../sql/collections/find-by-id.sql'),
   },
   users: {
     findOne: sql('../sql/users/find-one.sql'),
     relevance: sql('../sql/users/relevance.sql'),
     create: sql('../sql/users/create.sql'),
     createAnonymous: sql('../sql/users/create-anonymous.sql'),
-    connectAnonToFace: sql('../sql/users/connect-anon-to-face.sql')
+    connectAnonToFace: sql('../sql/users/connect-anon-to-face.sql'),
   },
   comments: {
     create: sql('../sql/comments/create.sql'),
-    find: sql('../sql/comments/find.sql')
-  }
+    find: sql('../sql/comments/find.sql'),
+  },
 };

@@ -14,7 +14,8 @@ router.post('/', authentication(true), (req, res) =>
       req.body
     )
     .then(row => res.status(201).send(row))
-    .catch(err => res.status(500).send({ err })));
+    .catch(err => res.status(500).send({ err }))
+);
 
 router.post('/:subjectId/collections', authentication(true), (req, res) =>
   db
@@ -26,7 +27,18 @@ router.post('/:subjectId/collections', authentication(true), (req, res) =>
       }
     )
     .then(row => res.status(201).send(row))
-    .catch(err => res.status(500).send({ err })));
+    .catch(err => res.status(500).send({ err }))
+);
+
+router.get('/:subjectId/ranking', (req, res) => {
+  db
+    .any(sql.subjects.ranking, { subjectId: req.params.subjectId })
+    .then(rankings => res.status(200).send(rankings))
+    .catch(err => {
+      console.log(err);
+      res.status(500).send({ err });
+    });
+});
 
 router.get('/', authentication(true), (req, res) =>
   db
@@ -34,14 +46,17 @@ router.get('/', authentication(true), (req, res) =>
     .then(subjects =>
       res
         .status(200)
-        .send(subjects.filter(subject => req.web || !subject.web_only)))
+        .send(subjects.filter(subject => req.web || !subject.web_only))
+    )
     .catch(err => {
       console.log(err);
       res.status(500).send({ err });
-    }));
+    })
+);
 
 router.get('/default', authentication(false), (req, res) =>
-  res.redirect(`/subjects/${process.env.DEFAULT_SUBJECT_ID}`));
+  res.redirect(`/subjects/${process.env.DEFAULT_SUBJECT_ID}`)
+);
 
 router.get('/:subjectId', authentication(true), (req, res) =>
   db
@@ -55,20 +70,23 @@ router.get('/:subjectId', authentication(true), (req, res) =>
           userId: req.user.id,
           subjectId: req.params.subjectId,
         })
-        .then(collections => res.status(200).send(
+        .then(collections =>
+          res.status(200).send(
             _.extend(subject, {
               collections,
             })
-          ))
+          )
+        )
         .catch(err =>
-          res
-            .status(500)
-            .send({ message: 'Could not fetch collections', err })))
+          res.status(500).send({ message: 'Could not fetch collections', err })
+        )
+    )
     .catch(err => {
       console.log(process.env.DATABASE_URL);
       console.log(err);
       res.status(500).send({ message: 'Could not fetch subject', err });
-    }));
+    })
+);
 
 router.get('/:subjectId/quiz', authentication(true), (req, res) =>
   db
@@ -79,8 +97,10 @@ router.get('/:subjectId/quiz', authentication(true), (req, res) =>
     .then(collections =>
       res.redirect(
         `/collections/${_.sample(collections).id}/quiz?type=daily&size=4`
-      ))
-    .catch(err => res.status(500).send({ err })));
+      )
+    )
+    .catch(err => res.status(500).send({ err }))
+);
 
 router.get('/:subjectId/collections', authentication(true), (req, res) =>
   db
@@ -89,7 +109,8 @@ router.get('/:subjectId/collections', authentication(true), (req, res) =>
       subjectId: req.params.subjectId,
     })
     .then(collections => res.status(200).send(collections))
-    .catch(err => res.status(500).send({ err })));
+    .catch(err => res.status(500).send({ err }))
+);
 
 router.put(
   '/:subjectId',
