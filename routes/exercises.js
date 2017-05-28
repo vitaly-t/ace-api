@@ -13,11 +13,13 @@ router.get('/:exerciseId', (req, res) =>
   db
     .one(sql.exercises.findOne, { exerciseId: req.params.exerciseId })
     .then(exercise =>
-      exerciseService.process(exercise, req.query.max_alts || 4))
+      exerciseService.process(exercise, req.query.max_alts || 4)
+    )
     .then(exercise => res.status(200).send(exercise))
     .catch(err => {
       res.status(500).send({ err });
-    }));
+    })
+);
 
 router.post(
   '/:exerciseId/reports',
@@ -91,7 +93,8 @@ router.put(
           .catch(err => {
             console.log(err);
             res.status(500).send({ err });
-          }))
+          })
+      )
       .catch(err => {
         console.log(err);
         res.status(500).send({ err });
@@ -140,9 +143,13 @@ router.post(
         userId: req.user.id,
         exerciseId: req.params.exerciseId,
         message: comment.message,
+        pinned: comment.pinned || false,
       })
       .then(() => res.status(204).send())
-      .catch(err => res.status(500).send({ err }));
+      .catch(err => {
+        console.log(err);
+        res.status(500).send({ err });
+      });
   }
 );
 
