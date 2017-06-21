@@ -14,20 +14,21 @@ const findValidUsername = (username, callback) =>
     .none('select * from users where username=${username}', { username })
     .then(() => callback(null, username))
     .catch(err =>
-      findValidUsername(username + Math.floor(Math.random() * 10), callback));
+      findValidUsername(username + Math.floor(Math.random() * 10), callback)
+    );
 
 router.post(
   '/anonymous',
   bodyValidation({
     required: ['deviceId'],
-    properties: { deviceId: { type: 'string' } }
+    properties: { deviceId: { type: 'string' } },
   }),
   (req, res) => {
     findValidUsername(morsommeNavn.generate(), (err, username) =>
       db
         .one(sql.users.createAnonymous, {
           username,
-          deviceId: req.body.deviceId
+          deviceId: req.body.deviceId,
         })
         .then(() => {
           userService.getUser(req.body.deviceId, (err, user) => {
@@ -38,7 +39,8 @@ router.post(
             res.status(201).send(user);
           });
         })
-        .catch(err => res.status(500).send()));
+        .catch(err => res.status(500).send())
+    );
   }
 );
 
@@ -52,9 +54,9 @@ router.post(
       username: {
         type: 'string',
         minLength: 6,
-        maxLength: 25
-      }
-    }
+        maxLength: 25,
+      },
+    },
   }),
   (req, res) =>
     superagent
@@ -65,7 +67,7 @@ router.post(
           .none(sql.users.connectAnonToFace, {
             username: req.body.username,
             facebookId,
-            deviceId: req.body.deviceId
+            deviceId: req.body.deviceId,
           })
           .then(() =>
             userService.getUser(facebookId, (err, user) => {
@@ -74,41 +76,39 @@ router.post(
                   .status(500)
                   .send({ message: 'This should never happen' });
               res.status(201).send(user);
-            }))
-          .catch(err => res.status(500).send()))
+            })
+          )
+          .catch(err => res.status(500).send())
+      )
       .catch(err => res.status(400).send({ err }))
 );
 
 router.post(
   '/facebook',
   bodyValidation({
-    required: ['facebookToken', 'username'],
-    properties: {
-      facebookToken: { type: 'string' },
-      username: {
-        type: 'string',
-        minLength: 6,
-        maxLength: 25
-      }
-    }
+    required: ['facebookToken'],
+    properties: { facebookToken: { type: 'string' } },
   }),
   (req, res) =>
     superagent
       .get(`${GRAPH_URL}/me?access_token=${req.body.facebookToken}`)
       .then(res => JSON.parse(res.text).id)
       .then(facebookId =>
-        db
-          .none(sql.users.create, { username: req.body.username, facebookId })
-          .then(() => {
-            userService.getUser(facebookId, (err, user) => {
-              if (err)
-                return res
-                  .status(500)
-                  .send({ message: 'This should never happen' });
-              res.status(201).send(user);
-            });
-          })
-          .catch(err => res.status(500).send()))
+        findValidUsername(morsommeNavn.generate(), (err, username) =>
+          db
+            .none(sql.users.create, { username, facebookId })
+            .then(() => {
+              userService.getUser(facebookId, (err, user) => {
+                if (err)
+                  return res
+                    .status(500)
+                    .send({ message: 'This should never happen' });
+                res.status(201).send(user);
+              });
+            })
+            .catch(err => res.status(500).send())
+        )
+      )
       .catch(err => res.status(400).send({ err }))
 );
 
@@ -118,10 +118,10 @@ router.put(
     bodyValidation({
       required: ['lastSubjectId'],
       properties: {
-        lastSubjectId: { type: 'integer' }
-      }
+        lastSubjectId: { type: 'integer' },
+      },
     }),
-    authentication(true)
+    authentication(true),
   ],
   (req, res) =>
     db
@@ -129,10 +129,10 @@ router.put(
         'update users set last_subject_id=${lastSubjectId} where id=${userId} returning *',
         { lastSubjectId: req.body.lastSubjectId, userId: req.user.id }
       )
-      .then(row =>
-        res.redirect(303, `/subjects/${req.body.lastSubjectId}`))
+      .then(row => res.redirect(303, `/subjects/${req.body.lastSubjectId}`))
       .catch(err =>
-        res.status(500).send({ err, message: "Couldn't update lastSubjectId" }))
+        res.status(500).send({ err, message: "Couldn't update lastSubjectId" })
+      )
 );
 
 module.exports = router;
