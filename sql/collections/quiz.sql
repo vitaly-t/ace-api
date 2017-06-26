@@ -3,6 +3,7 @@ select
     exercises.relevance_points >= 1 as is_approved,
     (case when user_likes_exercise.positive is null then false else true end) as has_liked,
     bool_or(case when a.user_id = ${userId} and a.status = true then true else false end) as status,
+    json_build_object('username', users.username, 'score', users.score) as creator,
     count(case when a.user_id = ${userId} and a.status = true then 1 end) as c_m,
     count(case when a.user_id = ${userId} and a.status = false then 1 end) as w_m,
     count(case when a.status = false then 1 end) as w_a,
