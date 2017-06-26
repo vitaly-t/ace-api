@@ -22,29 +22,17 @@ const processTF = exercise => {
 };
 
 const processMC = (exercise, maxAlts) => {
-  exercise.content.alternatives = _.filter(
-    exercise.content.alternatives,
-    alt => alt
-  );
+  exercise.content.alternatives = _.filter(exercise.content.alternatives, alt => alt);
   exercise.content.alternatives = _.shuffle(
     _.take(
       _.union(
-        [
-          _.first(
-            _.shuffle(
-              _.filter(exercise.content.alternatives, alt => alt.correct)
-            )
-          ),
-        ],
+        [_.first(_.shuffle(_.filter(exercise.content.alternatives, alt => alt.correct)))],
         _.filter(exercise.content.alternatives, alt => !alt.correct)
       ),
       maxAlts
     )
   );
-  exercise.content.alternatives = _.filter(
-    exercise.content.alternatives,
-    alt => alt
-  );
+  exercise.content.alternatives = _.filter(exercise.content.alternatives, alt => alt);
   return exercise;
 };
 
@@ -55,7 +43,7 @@ const validExerciseSchema = {
     question: { required: ['text'], properties: { text: { type: 'string' } } },
     alternatives: {
       type: 'array',
-      maxItems: 3,
+      maxItems: 5,
       items: {
         type: 'object',
         required: ['correct', 'text'],
@@ -76,7 +64,7 @@ const feasibleExerciseSchema = {
     alternatives: {
       type: 'array',
       minItems: 3,
-      maxItems: 3,
+      maxItems: 5,
       items: {
         type: 'object',
         required: ['correct', 'text'],
