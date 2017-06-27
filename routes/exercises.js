@@ -12,11 +12,10 @@ const express = require('express'),
 router.get('/:exerciseId', (req, res) =>
   db
     .one(sql.exercises.findOne, { exerciseId: req.params.exerciseId })
-    .then(exercise =>
-      exerciseService.process(exercise, req.query.max_alts || 4)
-    )
+    .then(exercise => exerciseService.process(exercise, req.query.max_alts || 4))
     .then(exercise => res.status(200).send(exercise))
     .catch(err => {
+      console.log(err);
       res.status(500).send({ err });
     })
 );
@@ -74,10 +73,7 @@ router.put(
     const content = req.body;
     const exercise = { content };
     exercise.id = req.params.exerciseId;
-    exercise.isFeasible = ajv.validate(
-      exerciseService.feasibleExerciseSchema,
-      content
-    );
+    exercise.isFeasible = ajv.validate(exerciseService.feasibleExerciseSchema, content);
     exercise.userId = req.user.id;
 
     db
