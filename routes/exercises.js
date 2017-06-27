@@ -12,7 +12,6 @@ const express = require('express'),
 router.get('/:exerciseId', (req, res) =>
   db
     .one(sql.exercises.findOne, { exerciseId: req.params.exerciseId })
-    .then(exercise => exerciseService.process(exercise, req.query.max_alts || 4))
     .then(exercise => res.status(200).send(exercise))
     .catch(err => {
       console.log(err);
