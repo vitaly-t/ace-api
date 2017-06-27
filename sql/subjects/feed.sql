@@ -9,4 +9,5 @@ from comments
   join users_view users on user_id=users.id
   join exercises on exercise_id=exercises.id 
   join collections on collection_id=collections.id 
-where subject_id=${subjectId};
+where subject_id=${subjectId}
+order by comments.created desc;
