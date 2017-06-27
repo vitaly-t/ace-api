@@ -3,6 +3,7 @@ select
   comments.created, 
   message,
   exercises.id as exercise_id,
+  exercises.content as exercise,
   users.username,
   users.experience
 from comments 
