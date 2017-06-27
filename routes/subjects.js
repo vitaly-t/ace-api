@@ -7,6 +7,16 @@ const express = require('express'),
   bodyValidation = require('body-validation'),
   authentication = require('../middleware/user-authentication');
 
+router.get('/:subjectId/feed', authentication(true), (req, res) =>
+  db
+    .any(sql.subjects.feed, { subjectId: req.params.subjectId })
+    .then(feed => res.status(200).send(feed))
+    .catch(err => {
+      console.log(err);
+      res.status(500).send({ err });
+    })
+);
+
 router.post('/', authentication(true), (req, res) =>
   db
     .one(
@@ -19,13 +29,10 @@ router.post('/', authentication(true), (req, res) =>
 
 router.post('/:subjectId/collections', authentication(true), (req, res) =>
   db
-    .one(
-      'insert into collections (name, subject_id) values (${name},${subjectId}) returning id',
-      {
-        name: req.body.name,
-        subjectId: req.params.subjectId,
-      }
-    )
+    .one('insert into collections (name, subject_id) values (${name},${subjectId}) returning id', {
+      name: req.body.name,
+      subjectId: req.params.subjectId,
+    })
     .then(row => res.status(201).send(row))
     .catch(err => res.status(500).send({ err }))
 );
@@ -44,9 +51,7 @@ router.get('/', authentication(true), (req, res) =>
   db
     .any(sql.subjects.findAll, { userId: req.user.id })
     .then(subjects =>
-      res
-        .status(200)
-        .send(subjects.filter(subject => req.web || !subject.web_only))
+      res.status(200).send(subjects.filter(subject => req.web || !subject.web_only))
     )
     .catch(err => {
       console.log(err);
@@ -77,9 +82,7 @@ router.get('/:subjectId', authentication(true), (req, res) =>
             })
           )
         )
-        .catch(err =>
-          res.status(500).send({ message: 'Could not fetch collections', err })
-        )
+        .catch(err => res.status(500).send({ message: 'Could not fetch collections', err }))
     )
     .catch(err => {
       console.log(process.env.DATABASE_URL);
@@ -95,9 +98,7 @@ router.get('/:subjectId/quiz', authentication(true), (req, res) =>
       count: 3,
     })
     .then(collections =>
-      res.redirect(
-        `/collections/${_.sample(collections).id}/quiz?type=daily&size=4`
-      )
+      res.redirect(`/collections/${_.sample(collections).id}/quiz?type=daily&size=4`)
     )
     .catch(err => res.status(500).send({ err }))
 );
@@ -128,10 +129,7 @@ router.put(
       onError = err => res.status(500).send({ err }),
       onSuccess = () => res.status(204).send();
     if (req.body.favorite)
-      db
-        .none(sql.subjects.addToFavorites, { userId, subjectId })
-        .then(onSuccess)
-        .catch(onError);
+      db.none(sql.subjects.addToFavorites, { userId, subjectId }).then(onSuccess).catch(onError);
     else
       db
         .none(sql.subjects.removeFromFavorites, { userId, subjectId })
