@@ -1,6 +1,6 @@
 const express = require('express'),
   router = express.Router(),
-  _ = require('underscore'),
+  _ = require('lodash'),
   assert = require('assert'),
   db = require('db'),
   sql = require('../services/sql'),
@@ -10,7 +10,7 @@ const express = require('express'),
 router.get('/:subjectId/feed', authentication(true), (req, res) =>
   db
     .any(sql.subjects.feed, { subjectId: req.params.subjectId })
-    .then(feed => res.status(200).send(feed))
+    .then(feed => res.status(200).send(_.map(feed, a => a.activity)))
     .catch(err => {
       console.log(err);
       res.status(500).send({ err });
