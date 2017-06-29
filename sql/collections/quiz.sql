@@ -1,6 +1,5 @@
 select
     exercises.*,
-    is_force_approved or sum(case when vote_exercise.positive=true then 1 else -1 end) >= 3 as is_approved,
     bool_or(case when vote_exercise.user_id=${userId} then true else false end) as has_voted,
     bool_or(case when a.user_id = ${userId} and a.status = true then true else false end) as status,
     json_build_object('username', users.username, 'experience', users.experience) as creator,
