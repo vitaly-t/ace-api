@@ -39,11 +39,14 @@ router.put('/:subjectId/order', (req, res) =>
 router.post('/', authentication(true), (req, res) =>
   db
     .one(
-      "insert into subjects (code, name, published) values (${req.body.code}, ${req.body.name}, 'yes') returning id",
+      "insert into subjects (code, name, published) values (${code}, ${name}, 'yes') returning id",
       req.body
     )
     .then(row => res.status(201).send(row))
-    .catch(err => res.status(500).send({ err }))
+    .catch(err => {
+      console.log(err);
+      res.status(500).send({ err });
+    })
 );
 
 router.post('/:subjectId/collections', authentication(true), (req, res) =>
