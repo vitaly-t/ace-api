@@ -18,13 +18,7 @@ const deduceRelevance = (skillLevel, initialDifficulty) => ex => {
   });
 };
 
-const tournamentSelection = (
-  xs,
-  evaluate,
-  winners,
-  nRounds,
-  tournamentSize = 3
-) => {
+const tournamentSelection = (xs, evaluate, winners, nRounds, tournamentSize = 3) => {
   if (nRounds === 0 || _.size(xs) === 0) return winners;
   const winner = _.maxBy(_.sampleSize(xs, tournamentSize), evaluate);
   return tournamentSelection(
@@ -43,8 +37,7 @@ const create = (isDaily, collectionId, exs, quizLength, nAlts) => {
   ),
     correctHistory = _.reduce(exercises, (sum, ex) => sum + ex.c_m, 0),
     wrongHistory = _.reduce(exercises, (sum, ex) => sum + ex.w_m, 0),
-    skillLevel =
-      2 * (correctHistory / (1 + wrongHistory + correctHistory) - 0.5),
+    skillLevel = 2 * (correctHistory / (1 + wrongHistory + correctHistory) - 0.5),
     measuredExercises = _.map(exercises, deduceRelevance(skillLevel, 4));
   const chosenExercises = tournamentSelection(
     measuredExercises,
