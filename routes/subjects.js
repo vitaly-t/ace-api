@@ -17,10 +17,29 @@ router.get('/:subjectId/feed', authentication(true), (req, res) =>
     })
 );
 
+router.put('/:subjectId/order', (req, res) =>
+  db
+    .tx(t =>
+      t.batch(
+        _.map(req.body.order, (collectionId, index) =>
+          t.none(
+            'update collections set position=${index} where id=${collectionId} and subject_id=${subjectId}',
+            { index, collectionId, subjectId: req.params.subjectId }
+          )
+        )
+      )
+    )
+    .then(() => res.status(204).send())
+    .catch(err => {
+      console.log(err);
+      res.status(500).send({ err, message: 'Could not position collections' });
+    })
+);
+
 router.post('/', authentication(true), (req, res) =>
   db
     .one(
-      "insert into subjects (code, name, published, color) values (${code}, ${name}, 'yes', ${color}) returning id",
+      "insert into subjects (code, name, published) values (${code}, ${name}, 'yes') returning id",
       req.body
     )
     .then(row => res.status(201).send(row))
