@@ -15,5 +15,4 @@ left join vote_exercise on exercises.id = vote_exercise.exercise_id
 left join comments on comments.exercise_id=exercises.id
 where collection_id=${collectionId} and not exercises.deleted 
 group by exercises.id, vote_exercise.positive,users.username, users.experience
-having sum(case when vote_exercise.positive=true then 1 else -1 end) > -3
 order by random()
