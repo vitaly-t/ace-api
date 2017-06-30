@@ -20,6 +20,7 @@ module.exports = {
     quiz: sql('../sql/subjects/quiz.sql'),
     ranking: sql('../sql/subjects/ranking.sql'),
     feed: sql('../sql/subjects/feed.sql'),
+    delete: sql('../sql/subjects/delete.sql'),
   },
   exercises: {
     update: sql('../sql/exercises/update.sql'),

@@ -17,6 +17,15 @@ router.get('/:subjectId/feed', authentication(true), (req, res) =>
     })
 );
 
+router.delete('/:subjectId', (req, res) =>
+  db
+    .one(sql.subjects.delete, {
+      subjectId: req.params.subjectId,
+    })
+    .then(result => res.status(204).send())
+    .catch(err => res.status(500).send({ err }))
+);
+
 router.put('/:subjectId/order', (req, res) =>
   db
     .tx(t =>
@@ -36,8 +45,7 @@ router.put('/:subjectId/order', (req, res) =>
     })
 );
 
-router.post('/', authentication(true), (req, res) => {
-  console.log(req.body);
+router.post('/', authentication(true), (req, res) =>
   db
     .one(
       "insert into subjects (code, name, published) values (${code}, ${name}, 'yes') returning *",
@@ -54,8 +62,8 @@ router.post('/', authentication(true), (req, res) => {
     .catch(err => {
       console.log(err);
       res.status(500).send({ err });
-    });
-});
+    })
+);
 
 router.post('/:subjectId/collections', authentication(true), (req, res) =>
   db
