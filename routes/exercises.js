@@ -68,20 +68,18 @@ router.post(
 router.put(
   '/:exerciseId',
   [authentication(true), bodyValidation(exerciseService.validExerciseSchema)],
-  (req, res) => {
-    const content = req.body;
-    const exercise = { content };
-    exercise.id = req.params.exerciseId;
-    exercise.isFeasible = ajv.validate(exerciseService.feasibleExerciseSchema, content);
-    exercise.userId = req.user.id;
-
+  (req, res) =>
     db
-      .none(sql.exercises.update, exercise)
+      .none(sql.exercises.update, {
+        id: req.params.exerciseId,
+        userId: req.user.id,
+        content: req.body,
+      })
       .then(() =>
         db
           .none(sql.exercises.vote, {
             userId: req.user.id,
-            exerciseId: exercise.id,
+            exerciseId: req.params.exerciseId,
             positive: true,
           })
           .then(() => res.status(201).send())
@@ -93,8 +91,7 @@ router.put(
       .catch(err => {
         console.log(err);
         res.status(500).send({ err });
-      });
-  }
+      })
 );
 
 router.post(
