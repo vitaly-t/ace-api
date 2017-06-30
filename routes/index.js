@@ -2,8 +2,15 @@ const GRAPH_URL = 'https://graph.facebook.com',
   express = require('express'),
   router = express.Router(),
   superagent = require('superagent-as-promised')(require('superagent')),
+  authentication = require('../middleware/user-authentication'),
   userService = require('../services/user-service');
 
+router.get('/me', authentication(true), (req, res) =>
+  userService.getUser(req.user.id.toString(), (err, user) => {
+    if (err) return res.status(404).send({ message: 'User not found' });
+    res.status(200).send(user);
+  })
+);
 router.get('/token', (req, res) => {
   const facebookToken = req.query.facebook_token;
   if (facebookToken) {
