@@ -36,18 +36,26 @@ router.put('/:subjectId/order', (req, res) =>
     })
 );
 
-router.post('/', authentication(true), (req, res) =>
+router.post('/', authentication(true), (req, res) => {
+  console.log(req.body);
   db
     .one(
-      "insert into subjects (code, name, published) values (${code}, ${name}, 'yes') returning id",
+      "insert into subjects (code, name, published) values (${code}, ${name}, 'yes') returning *",
       req.body
     )
-    .then(row => res.status(201).send(row))
+    .then(subject =>
+      db
+        .none('insert into favorites (user_id, subject_id) values (${userId}, ${subjectId})', {
+          userId: req.user.id,
+          subjectId: subject.id,
+        })
+        .then(() => res.status(201).send(subject))
+    )
     .catch(err => {
       console.log(err);
       res.status(500).send({ err });
-    })
-);
+    });
+});
 
 router.post('/:subjectId/collections', authentication(true), (req, res) =>
   db
@@ -72,9 +80,7 @@ router.get('/:subjectId/ranking', (req, res) => {
 router.get('/', authentication(true), (req, res) =>
   db
     .any(sql.subjects.findAll, { userId: req.user.id })
-    .then(subjects =>
-      res.status(200).send(subjects.filter(subject => req.web || !subject.web_only))
-    )
+    .then(subjects => res.status(200).send(subjects))
     .catch(err => {
       console.log(err);
       res.status(500).send({ err });

@@ -7,7 +7,7 @@ select subjects.*, schools.name as school, count (*) as downloads, case
     end as favorite
 from subjects
 left join favorites on subjects.id = subject_id
-join schools on school_id=schools.id
+left join schools on school_id=schools.id
 where published = 'yes'
 group by subjects.id, schools.name
 order by favorite desc, downloads desc, code;
