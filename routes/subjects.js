@@ -136,18 +136,17 @@ router.get('/:subjectId/collections', authentication(true), (req, res) =>
     .catch(err => res.status(500).send({ err }))
 );
 
-router.put(
-  '/:subjectId',
+router.post(
+  '/favorites',
   [
     authentication(true),
     bodyValidation({
-      required: ['favorite'],
-      properties: { subjectId: { type: 'boolean' } },
+      required: ['favorite', 'subjectId'],
+      properties: { favorite: { type: 'boolean' }, subjectId: { type: 'number' } },
     }),
-    authentication(true),
   ],
   (req, res) => {
-    const subjectId = req.params.subjectId,
+    const subjectId = req.body.subjectId,
       userId = req.user.id,
       onError = err => res.status(500).send({ err }),
       onSuccess = () => res.status(204).send();
@@ -159,6 +158,18 @@ router.put(
         .then(onSuccess)
         .catch(onError);
   }
+);
+
+router.put('/:subjectId', (req, res) =>
+  db
+    .none(sql.subjects.update, {
+      code: req.body.code,
+      name: req.body.name,
+      description: req.body.description,
+      subjectId: req.params.subjectId,
+    })
+    .then(() => res.status(204).send())
+    .catch(err => res.status(500).send({ err }))
 );
 
 module.exports = router;
