@@ -7,7 +7,9 @@ const express = require('express'),
   bodyValidation = require('body-validation'),
   authentication = require('../middleware/user-authentication'),
   db = require('db'),
-  sql = require('../services/sql');
+  sql = require('../services/sql'),
+  normalizr = require('normalizr'),
+  commentSchema = new normalizr.schema.Entity('comments');
 
 router.get('/:exerciseId', (req, res) =>
   db
@@ -148,7 +150,7 @@ router.post(
 router.get('/:exerciseId/comments', (req, res) => {
   db
     .any(sql.comments.find, { exerciseId: req.params.exerciseId })
-    .then(comments => res.status(200).send(comments))
+    .then(comments => res.status(200).send(normalizr.normalize(comments, [commentSchema])))
     .catch(err => res.status(500).send({ err }));
 });
 

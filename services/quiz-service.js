@@ -30,7 +30,7 @@ const tournamentSelection = (xs, evaluate, winners, nRounds, tournamentSize = 3)
   );
 };
 
-const create = (isDaily, collectionId, exs, quizLength, nAlts) => {
+const create = (exs, quizLength, nAlts) => {
   const exercises = _.map(
     exs,
     ex => (ex.is_feasible ? exerciseService.process(ex, nAlts || 3) : ex)
@@ -46,20 +46,7 @@ const create = (isDaily, collectionId, exs, quizLength, nAlts) => {
     quizLength,
     3
   );
-  const p = parseFloat(process.env.CONTRIBUTE_P) || 0;
-  const r = _.random(1, true);
-  const newExercises = r <= p && !isDaily
-    ? [
-        {
-          id: 0,
-          collection_id: collectionId,
-          is_feasible: false,
-          content: { type: 'mc', question: { text: '' }, alternatives: [] },
-        },
-      ]
-    : [];
-
-  return _.union(_.shuffle(_.take(chosenExercises, quizLength)), newExercises);
+  return _.take(_.shuffle(chosenExercises), quizLength);
 };
 
 module.exports = {

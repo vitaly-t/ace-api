@@ -1,11 +1,16 @@
 const express = require('express'),
   router = express.Router(),
+  normalizr = require('normalizr'),
   _ = require('lodash'),
   assert = require('assert'),
   db = require('db'),
   sql = require('../services/sql'),
   bodyValidation = require('body-validation'),
-  authentication = require('../middleware/user-authentication');
+  authentication = require('../middleware/user-authentication'),
+  collectionSchema = new normalizr.schema.Entity('topics'),
+  subjectSchema = new normalizr.schema.Entity('courses', {
+    topics: [collectionSchema],
+  });
 
 router.get('/:subjectId/feed', authentication(true), (req, res) =>
   db
@@ -88,7 +93,7 @@ router.get('/:subjectId/ranking', (req, res) => {
 router.get('/', authentication(true), (req, res) =>
   db
     .any(sql.subjects.findAll, { userId: req.user.id })
-    .then(subjects => res.status(200).send(subjects))
+    .then(subjects => res.status(200).send(normalizr.normalize(subjects, [subjectSchema])))
     .catch(err => {
       console.log(err);
       res.status(500).send({ err });
@@ -105,26 +110,8 @@ router.get('/:subjectId', authentication(true), (req, res) =>
       subjectId: req.params.subjectId,
       userId: req.user.id,
     })
-    .then(subject =>
-      db
-        .any(sql.subjects.findCollections, {
-          userId: req.user.id,
-          subjectId: req.params.subjectId,
-        })
-        .then(collections =>
-          res.status(200).send(
-            _.extend(subject, {
-              collections,
-            })
-          )
-        )
-        .catch(err => res.status(500).send({ message: 'Could not fetch collections', err }))
-    )
-    .catch(err => {
-      console.log(process.env.DATABASE_URL);
-      console.log(err);
-      res.status(500).send({ message: 'Could not fetch subject', err });
-    })
+    .then(subject => res.status(200).send(normalizr.normalize(subject, subjectSchema)))
+    .catch(err => res.status(500).send({ message: 'Could not fetch subject', err }))
 );
 
 router.get('/:subjectId/quiz', authentication(true), (req, res) =>
