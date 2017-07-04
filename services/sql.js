@@ -33,6 +33,7 @@ module.exports = {
   },
   collections: {
     quiz: sql('../sql/collections/quiz.sql'),
+    delete: sql('../sql/collections/delete.sql'),
     insertExercise: sql('../sql/collections/insert-exercise.sql'),
     findExercises: sql('../sql/collections/find-exercises.sql'),
     findById: sql('../sql/collections/find-by-id.sql'),
