@@ -9,6 +9,7 @@ const express = require('express'),
   db = require('db'),
   sql = require('../services/sql'),
   normalizr = require('normalizr'),
+  authorization = require('../middleware/authorization'),
   commentSchema = new normalizr.schema.Entity('comments');
 
 router.get('/:exerciseId', (req, res) =>
@@ -129,6 +130,7 @@ router.post(
       required: ['message'],
       properties: { message: { type: 'string' } },
     }),
+    authorization('COMMENT'),
   ],
   (req, res) => {
     const comment = req.body;
@@ -139,7 +141,7 @@ router.post(
         message: comment.message,
         pinned: comment.pinned || false,
       })
-      .then(() => res.status(204).send())
+      .then(() => res.status(201).send({ reinforcement: req.reinforcement }))
       .catch(err => {
         console.log(err);
         res.status(500).send({ err });
