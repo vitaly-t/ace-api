@@ -7,6 +7,7 @@ const express = require('express'),
   sql = require('../services/sql'),
   bodyValidation = require('body-validation'),
   authentication = require('../middleware/user-authentication'),
+  authorization = require('../middleware/authorization'),
   collectionSchema = new normalizr.schema.Entity('topics'),
   subjectSchema = new normalizr.schema.Entity('courses', {
     topics: [collectionSchema],
@@ -90,9 +91,9 @@ router.get('/:subjectId/ranking', (req, res) => {
     });
 });
 
-router.get('/', authentication(true), (req, res) =>
+router.get('/', [authentication(true), authorization('EDIT_EXERCISE')], (req, res) =>
   db
-    .any(sql.subjects.findAll, { userId: req.user.id })
+    .any(sql.subjects.findAll, { userId: req.user.id, search: req.query.search || '' })
     .then(subjects => res.status(200).send(normalizr.normalize(subjects, [subjectSchema])))
     .catch(err => {
       console.log(err);

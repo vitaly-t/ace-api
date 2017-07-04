@@ -12,7 +12,6 @@ module.exports = {
     findPopularCollections: sql('../sql/subjects/find-popular-collections.sql'),
     findById: sql('../sql/subjects/find-by-id.sql'),
     findAll: sql('../sql/subjects/find-all.sql'),
-    update: sql('../sql/subjects/update.sql'),
     addToFavorites: sql('../sql/subjects/add-to-favorites.sql'),
     removeFromFavorites: sql('../sql/subjects/remove-from-favorites.sql'),
     findCollections: sql('../sql/subjects/find-collections.sql'),
