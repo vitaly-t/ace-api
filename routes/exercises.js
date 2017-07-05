@@ -147,11 +147,14 @@ router.post(
   }
 );
 
-router.get('/:exerciseId/comments', (req, res) => {
+router.get('/:exerciseId/comments', authentication(true), (req, res) => {
   db
-    .any(sql.comments.find, { exerciseId: req.params.exerciseId })
+    .any(sql.comments.find, { exerciseId: req.params.exerciseId, userId: req.user.id })
     .then(comments => res.status(200).send(normalizr.normalize(comments, [commentSchema])))
-    .catch(err => res.status(500).send({ err }));
+    .catch(err => {
+      console.log(err);
+      res.status(500).send({ err });
+    });
 });
 
 module.exports = router;

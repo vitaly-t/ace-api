@@ -48,5 +48,6 @@ module.exports = {
   comments: {
     create: sql('../sql/comments/create.sql'),
     find: sql('../sql/comments/find.sql'),
+    vote: sql('../sql/comments/vote.sql'),
   },
 };
