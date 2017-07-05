@@ -2,6 +2,7 @@ const express = require('express'),
   router = express.Router(),
   bodyValidation = require('body-validation'),
   authentication = require('../middleware/user-authentication'),
+  authorization = require('../middleware/authorization'),
   db = require('db'),
   sql = require('../services/sql');
 
@@ -14,6 +15,7 @@ router.post(
       required: ['positive'],
       properties: { positive: { type: 'boolean' } },
     }),
+    authorization('VOTE_COMMENT'),
   ],
   (req, res) =>
     db
