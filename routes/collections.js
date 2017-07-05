@@ -6,6 +6,7 @@ const express = require('express'),
   normalizr = require('normalizr'),
   bodyValidation = require('body-validation'),
   authentication = require('../middleware/user-authentication'),
+  authorization = require('../middleware/authorization'),
   db = require('db'),
   quizService = require('../services/quiz-service'),
   exercisesService = require('../services/exercises-service'),
@@ -45,7 +46,11 @@ router.get('/:collectionId/quiz', authentication(true), (req, res) =>
 
 router.post(
   '/:collectionId/exercises',
-  [authentication(true), bodyValidation(exercisesService.validExerciseSchema)],
+  [
+    authentication(true),
+    bodyValidation(exercisesService.validExerciseSchema),
+    authorization('CREATE_EXERCISE'),
+  ],
   (req, res) => {
     const content = req.body;
     const exercise = { content };
