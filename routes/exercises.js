@@ -1,8 +1,6 @@
 const express = require('express'),
   router = express.Router(),
   _ = require('underscore'),
-  Ajv = require('ajv'),
-  ajv = new Ajv(),
   exerciseService = require('../services/exercises-service'),
   bodyValidation = require('body-validation'),
   authentication = require('../middleware/user-authentication'),

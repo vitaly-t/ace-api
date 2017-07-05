@@ -32,7 +32,8 @@ router.delete('/:subjectId', (req, res) =>
     .catch(err => res.status(500).send({ err }))
 );
 
-router.put('/:subjectId/order', (req, res) =>
+router.put('/:subjectId/order', (req, res) => {
+  console.log(req.body);
   db
     .tx(t =>
       t.batch(
@@ -48,8 +49,8 @@ router.put('/:subjectId/order', (req, res) =>
     .catch(err => {
       console.log(err);
       res.status(500).send({ err, message: 'Could not position collections' });
-    })
-);
+    });
+});
 
 router.post('/', authentication(true), (req, res) =>
   db
@@ -94,9 +95,7 @@ router.get('/:subjectId/ranking', (req, res) => {
 router.get('/', [authentication(true)], (req, res) =>
   db
     .any(sql.subjects.findAll, { userId: req.user.id, search: req.query.search || '' })
-    .then(subjects => {
-      res.status(200).send(normalizr.normalize(subjects, [subjectSchema]));
-    })
+    .then(subjects => res.status(200).send(normalizr.normalize(subjects, [subjectSchema])))
     .catch(err => {
       console.log(err);
       res.status(500).send({ err });
