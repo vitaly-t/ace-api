@@ -6,16 +6,25 @@ const GRAPH_URL = 'https://graph.facebook.com',
   bodyValidation = require('body-validation'),
   morsommeNavn = require('morsomme-navn'),
   userService = require('../services/user-service'),
-  authentication = require('../middleware/user-authentication');
-superagent = require('superagent-as-promised')(require('superagent'));
+  authentication = require('../middleware/user-authentication'),
+  _ = require('underscore'),
+  superagent = require('superagent-as-promised')(require('superagent'));
 
 const findValidUsername = (username, callback) =>
   db
     .none('select * from users where username=${username}', { username })
     .then(() => callback(null, username))
-    .catch(err =>
-      findValidUsername(username + Math.floor(Math.random() * 10), callback)
-    );
+    .catch(err => findValidUsername(username + Math.floor(Math.random() * 10), callback));
+
+router.get('/notifications', authentication(true), (req, res) =>
+  db
+    .any(sql.users.notifications, { userId: req.user.id })
+    .then(feed => res.status(200).send(_.map(feed, a => a.activity)))
+    .catch(err => {
+      console.log(err);
+      res.status(500).send({ err });
+    })
+);
 
 router.post(
   '/anonymous',
@@ -32,10 +41,7 @@ router.post(
         })
         .then(() => {
           userService.getUser(req.body.deviceId, (err, user) => {
-            if (err)
-              return res
-                .status(500)
-                .send({ message: 'This should never happen' });
+            if (err) return res.status(500).send({ message: 'This should never happen' });
             res.status(201).send(user);
           });
         })
@@ -71,10 +77,7 @@ router.post(
           })
           .then(() =>
             userService.getUser(facebookId, (err, user) => {
-              if (err)
-                return res
-                  .status(500)
-                  .send({ message: 'This should never happen' });
+              if (err) return res.status(500).send({ message: 'This should never happen' });
               res.status(201).send(user);
             })
           )
@@ -99,10 +102,7 @@ router.post(
             .none(sql.users.create, { username, facebookId })
             .then(() => {
               userService.getUser(facebookId, (err, user) => {
-                if (err)
-                  return res
-                    .status(500)
-                    .send({ message: 'This should never happen' });
+                if (err) return res.status(500).send({ message: 'This should never happen' });
                 res.status(201).send(user);
               });
             })
@@ -125,14 +125,12 @@ router.put(
   ],
   (req, res) =>
     db
-      .one(
-        'update users set last_subject_id=${lastSubjectId} where id=${userId} returning *',
-        { lastSubjectId: req.body.lastSubjectId, userId: req.user.id }
-      )
+      .one('update users set last_subject_id=${lastSubjectId} where id=${userId} returning *', {
+        lastSubjectId: req.body.lastSubjectId,
+        userId: req.user.id,
+      })
       .then(row => res.redirect(303, `/subjects/${req.body.lastSubjectId}`))
-      .catch(err =>
-        res.status(500).send({ err, message: "Couldn't update lastSubjectId" })
-      )
+      .catch(err => res.status(500).send({ err, message: "Couldn't update lastSubjectId" }))
 );
 
 module.exports = router;
