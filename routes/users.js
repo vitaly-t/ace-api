@@ -19,7 +19,13 @@ const findValidUsername = (username, callback) =>
 router.get('/notifications', authentication(true), (req, res) =>
   db
     .any(sql.users.notifications, { userId: req.user.id })
-    .then(feed => res.status(200).send(_.map(feed, a => a.activity)))
+    .then(feed =>
+      db
+        .none('update users set last_checked_notifications=now() where id=${userId}', {
+          userId: req.user.id,
+        })
+        .then(() => res.status(200).send(_.map(feed, a => a.activity)))
+    )
     .catch(err => {
       console.log(err);
       res.status(500).send({ err });
