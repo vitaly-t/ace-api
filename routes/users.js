@@ -18,7 +18,10 @@ const findValidUsername = (username, callback) =>
 
 router.get('/notifications', authentication(true), (req, res) =>
   db
-    .any(sql.users.notifications, { userId: req.user.id })
+    .any(sql.users.notifications, {
+      userId: req.user.id,
+      lastChecked: req.user.last_checked_notifications,
+    })
     .then(feed =>
       db
         .none('update users set last_checked_notifications=now() where id=${userId}', {

@@ -7,7 +7,7 @@ select * from (select time, row_to_json(row) as activity from (
     exercises.content->'question'->>'text' as question,
     users.username,
     users.experience,
-    users.last_checked_notifications > comments.created as has_seen
+    comments.created < ${lastChecked} as has_seen
   from comments 
     join users_view users on user_id=users.id
     join exercises on exercise_id=exercises.id 
@@ -25,7 +25,7 @@ select time, row_to_json(row) as activity from (
     exercises.content->'question'->>'text' as question,
     users.username,
     users.experience,
-    users.last_checked_notifications > comments.created as has_seen
+    comments.created < ${lastChecked} as has_seen
   from comments 
     join users_view users on user_id=users.id
     join exercises on exercise_id=exercises.id 
