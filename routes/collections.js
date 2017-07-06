@@ -66,7 +66,7 @@ router.post(
             exerciseId: exercise.id,
             positive: true,
           })
-          .then(() => res.status(201).send())
+          .then(() => res.status(201).json())
           .catch(err => {
             console.log(err);
             res.status(500).send({ err });
