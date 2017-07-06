@@ -134,7 +134,7 @@ router.get('/:subjectId/collections', authentication(true), (req, res) =>
       userId: req.user.id,
       subjectId: req.params.subjectId,
     })
-    .then(collections => res.status(200).send(collections))
+    .then(collections => res.status(200).send(normalizr.normalize(collections, [collectionSchema])))
     .catch(err => res.status(500).send({ err }))
 );
 
