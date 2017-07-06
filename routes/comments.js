@@ -24,7 +24,7 @@ router.post(
         commentId: req.params.commentId,
         positive: req.body.positive,
       })
-      .then(() => res.status(201).send())
+      .then(() => res.status(201).json())
       .catch(err => {
         console.log(err);
         res.status(500).send({ err });
