@@ -94,7 +94,10 @@ router.get('/:subjectId/ranking', (req, res) => {
 
 router.get('/', [authentication(true)], (req, res) =>
   db
-    .any(sql.subjects.findAll, { userId: req.user.id, search: req.query.search || '' })
+    .any(sql.subjects.findAll, {
+      userId: req.user.id,
+      search: req.query.search || '',
+    })
     .then(subjects => res.status(200).send(normalizr.normalize(subjects, [subjectSchema])))
     .catch(err => {
       console.log(err);

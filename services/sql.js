@@ -51,4 +51,7 @@ module.exports = {
     find: sql('../sql/comments/find.sql'),
     vote: sql('../sql/comments/vote.sql'),
   },
+  schools: {
+    findAllSubjects: sql('../sql/schools/find-all-subjects.sql'),
+  },
 };
