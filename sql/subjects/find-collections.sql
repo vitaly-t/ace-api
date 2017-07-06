@@ -1,6 +1,6 @@
 select
     collections.*,
-    count(exercises.id),
+    count(exercises.id) as size,
     count(a) as correctly_answered
 from collections
     left join exercises on collection_id=collections.id
