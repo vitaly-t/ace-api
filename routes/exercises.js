@@ -104,6 +104,7 @@ router.post(
       required: ['positive'],
       properties: { positive: { type: 'boolean' } },
     }),
+    authorization('VOTE_EXERCISE'),
   ],
   (req, res) =>
     db
@@ -112,7 +113,7 @@ router.post(
         exerciseId: req.params.exerciseId,
         positive: req.body.positive,
       })
-      .then(() => res.status(201).send())
+      .then(() => res.status(201).json())
       .catch(err => {
         console.log(err);
         res.status(500).send({ err });
