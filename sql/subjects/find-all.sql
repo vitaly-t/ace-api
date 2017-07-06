@@ -1,10 +1,10 @@
 -- userId
 
-select subjects.*, schools.name as school, count (*) as downloads, case
-        when ${userId} in (select user_id from favorites where subject_id = subjects.id)
-            then true
-            else false
-    end as favorite
+select 
+  subjects.*, 
+  schools.name as school, 
+  count (*) as downloads, 
+  ${userId} in (select user_id from favorites where subject_id = subjects.id) as favorite
 from subjects
 left join favorites on subjects.id = subject_id
 left join schools on school_id=schools.id
