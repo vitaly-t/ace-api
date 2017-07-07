@@ -28,15 +28,8 @@ router.get('/:collectionId/quiz', authentication(true), (req, res) =>
     .any(sql.collections.quiz, {
       collectionId: req.params.collectionId,
       userId: req.user.id,
-      isDaily: req.query.type === 'daily',
+      size: parseInt(req.query.size) || 6,
     })
-    .then(exercises =>
-      quizService.create(
-        exercises,
-        parseInt(req.query.size) || 6,
-        parseInt(req.query.max_alts) || 3
-      )
-    )
     .then(exercises => res.status(200).send(normalizr.normalize(exercises, [exerciseSchema])))
     .catch(err => {
       console.log(err);
