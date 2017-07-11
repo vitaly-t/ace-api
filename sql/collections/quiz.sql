@@ -1,15 +1,12 @@
 select
-    exercises.*,
-    v_exercise_is_approved.is_approved,
+    exercises.id,
+    json_agg(exercises.content)->0 as content,
     bool_or(case when votes.user_id=${userId} then true else false end) as has_voted,
-    json_build_object('username', users.username, 'experience', users.experience) as creator,
-    count(distinct comments.id) as n_comments
-from exercises
-left join v_exercise_is_approved on exercises.id=v_exercise_is_approved.exercise_id
+    json_agg(users.*) as creator
+from v_exercises exercises
 left join users_view users on exercises.updated_by=users.id
 left join votes on exercises.id = votes.exercise_id
-left join comments on comments.exercise_id=exercises.id
-where collection_id=${collectionId} and not exercises.deleted and not v_exercise_is_approved.is_disapproved
-group by exercises.id, v_exercise_is_approved.is_approved, votes.positive,users.username, users.experience
+where collection_id=${collectionId} and not exercises.deleted and not exercises.is_disapproved
+group by exercises.id, exercises.content ->> 'question', votes.positive,users.username, users.experience
 order by random()
 limit ${size}

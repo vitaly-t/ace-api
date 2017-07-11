@@ -22,7 +22,8 @@ router.post(
       },
     }),
   ],
-  (req, res) =>
+  (req, res) => {
+    console.log(req.body);
     db
       .tx(t =>
         t.batch(
@@ -32,7 +33,8 @@ router.post(
         )
       )
       .then(data => res.status(201).send())
-      .catch(err => res.status(500).send({ err }))
+      .catch(err => res.status(500).send({ err }));
+  }
 );
 
 module.exports = router;
