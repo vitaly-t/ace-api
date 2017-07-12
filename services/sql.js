@@ -5,6 +5,11 @@ const QueryFile = require('pg-promise').QueryFile,
   };
 
 module.exports = {
+  common: {
+    find: sql('../sql/common/find.sql'),
+    delete: sql('../sql/common/delete.sql'),
+    create: sql('../sql/common/create.sql'),
+  },
   answers: {
     postAnswers: sql('../sql/answers/post-answers.sql'),
   },
@@ -21,6 +26,7 @@ module.exports = {
     feed: sql('../sql/subjects/feed.sql'),
     delete: sql('../sql/subjects/delete.sql'),
     update: sql('../sql/subjects/update.sql'),
+    exercises: sql('../sql/subjects/exercises.sql'),
   },
   exercises: {
     update: sql('../sql/exercises/update.sql'),

@@ -8,10 +8,24 @@ const express = require('express'),
   bodyValidation = require('body-validation'),
   authentication = require('../middleware/user-authentication'),
   authorization = require('../middleware/authorization'),
+  exerciseSchema = new normalizr.schema.Entity('exercises'),
   collectionSchema = new normalizr.schema.Entity('topics'),
   subjectSchema = new normalizr.schema.Entity('courses', {
     topics: [collectionSchema],
   });
+
+router.get('/:subjectId/exercises', authentication(true), async (req, res) => {
+  try {
+    const exercises = await db.any(sql.common.findAll, {
+      table: 'v_exercises',
+      where: `subject_id=${req.params.subjectId} and updated_by=${req.user.id}`,
+    });
+    res.status(200).send(normalizr.normalize(exercises, [exerciseSchema]));
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({ err });
+  }
+});
 
 router.get('/:subjectId/feed', authentication(true), (req, res) =>
   db
@@ -21,15 +35,6 @@ router.get('/:subjectId/feed', authentication(true), (req, res) =>
       console.log(err);
       res.status(500).send({ err });
     })
-);
-
-router.delete('/:subjectId', (req, res) =>
-  db
-    .one(sql.subjects.delete, {
-      subjectId: req.params.subjectId,
-    })
-    .then(result => res.status(204).send())
-    .catch(err => res.status(500).send({ err }))
 );
 
 router.put('/:subjectId/order', (req, res) => {
@@ -52,7 +57,7 @@ router.put('/:subjectId/order', (req, res) => {
     });
 });
 
-router.post('/', authentication(true), (req, res) =>
+/*router.post('/', authentication(true), (req, res) =>
   db
     .one(
       "insert into subjects (code, name, published) values (${code}, ${name}, 'yes') returning *",
@@ -70,7 +75,7 @@ router.post('/', authentication(true), (req, res) =>
       console.log(err);
       res.status(500).send({ err });
     })
-);
+);*/
 
 router.post('/:subjectId/collections', authentication(true), (req, res) =>
   db
@@ -165,7 +170,7 @@ router.post(
   }
 );
 
-router.put('/:subjectId', (req, res) =>
+/*router.put('/:subjectId', (req, res) =>
   db
     .none(sql.subjects.update, {
       code: req.body.code,
@@ -175,6 +180,6 @@ router.put('/:subjectId', (req, res) =>
     })
     .then(() => res.status(204).send())
     .catch(err => res.status(500).send({ err }))
-);
+);*/
 
 module.exports = router;

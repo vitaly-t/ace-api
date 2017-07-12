@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "babel-node --presets es2015 ./bin/www"
   },
   "dependencies": {
     "ajv": "^4.11.5",
@@ -14,6 +14,7 @@
     "crypto": "0.0.3",
     "db": "file:local_node_modules/db",
     "debug": "~2.2.0",
+    "errorhandler": "^1.5.0",
     "express": "~4.13.4",
     "express-mung": "^0.4.6",
     "jade": "~1.11.0",
@@ -29,5 +30,10 @@
     "superagent-as-promised": "^4.0.0",
     "underscore": "^1.8.3",
     "uuid": "^2.0.3"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1"
   }
 }

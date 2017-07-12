@@ -1,3 +1,4 @@
+import { create, read, update, get, put, post, del } from '../services/common.js';
 const express = require('express'),
   router = express.Router(),
   _ = require('underscore'),
@@ -8,119 +9,71 @@ const express = require('express'),
   sql = require('../services/sql'),
   normalizr = require('normalizr'),
   authorization = require('../middleware/authorization'),
+  exerciseSchema = new normalizr.schema.Entity('exercises'),
   commentSchema = new normalizr.schema.Entity('comments');
 
-router.get('/:exerciseId', (req, res) =>
-  db
-    .one(sql.exercises.findOne, { exerciseId: req.params.exerciseId })
-    .then(exercise => res.status(200).send(exercise))
-    .catch(err => {
-      console.log(err);
-      res.status(500).send({ err });
-    })
-);
+get('/:exerciseId', [], async (req, res) => {
+  const result = await read('v_exercises', `id=${req.params.exerciseId}`);
+  return normalizr.normalize(result[0], exerciseSchema);
+})(router);
 
-router.post(
+post(
   '/:exerciseId/reports',
   [
-    bodyValidation({
-      type: 'object',
-      required: ['message'],
-      properties: { message: { type: 'string' } },
-    }),
+    authentication(true),
+    bodyValidation({ required: ['message'], properties: { message: { type: 'string' } } }),
   ],
-  (req, res) => {
-    req.body.exerciseId = req.params.exerciseId;
-    db
-      .one(sql.reports.insert, {
-        exerciseId: req.params.exerciseId,
-        userId: req.user.id,
-        message: req.body.message,
-      })
-      .then(result => result.id)
-      .then(insertedId => res.status(201).send({ insertedId }))
-      .catch(err => {
-        res.status(500).send({ err });
-      });
-  }
-);
+  (req, res) =>
+    create('reports', {
+      exercise_id: req.params.exerciseId,
+      user_id: req.user.id,
+      ...req.body,
+    })
+)(router);
 
-router.post(
+post(
   '/:exerciseId/answers',
   [
     authentication(true),
     bodyValidation({
-      type: 'object',
       required: ['answer_status'],
       properties: { answer_status: { type: 'boolean' } },
     }),
   ],
   (req, res) =>
-    db
-      .none(sql.exercises.answer, {
-        answerStatus: req.body.answer_status,
-        userId: req.user.id,
-        exerciseId: req.params.exerciseId,
-      })
-      .then(() => res.status(204).send())
-      .catch(err => res.status(500).send({ err }))
-);
+    create('answers', {
+      status: req.body.answer_status,
+      user_id: req.user.id,
+      exercise_id: req.params.exerciseId,
+    })
+)(router);
 
-router.put(
+put(
   '/:exerciseId',
   [authentication(true), bodyValidation(exerciseService.validExerciseSchema)],
   (req, res) =>
-    db
-      .none(sql.exercises.update, {
-        id: req.params.exerciseId,
-        userId: req.user.id,
-        content: req.body,
-      })
-      .then(() =>
-        db
-          .none(sql.exercises.vote, {
-            userId: req.user.id,
-            exerciseId: req.params.exerciseId,
-            positive: true,
-          })
-          .then(() => res.status(201).send())
-          .catch(err => {
-            console.log(err);
-            res.status(500).send({ err });
-          })
-      )
-      .catch(err => {
-        console.log(err);
-        res.status(500).send({ err });
-      })
-);
+    update('exercises', req.params.exerciseId, {
+      updated_by: req.user.id,
+      content: req.body,
+    })
+)(router);
 
-router.post(
+post(
   '/:exerciseId/votes',
   [
     authentication(true),
-    bodyValidation({
-      type: 'object',
-      required: ['positive'],
-      properties: { positive: { type: 'boolean' } },
-    }),
+    bodyValidation({ required: ['positive'], properties: { positive: { type: 'boolean' } } }),
     authorization('VOTE_EXERCISE'),
   ],
   (req, res) =>
-    db
-      .none(sql.exercises.vote, {
-        userId: req.user.id,
-        exerciseId: req.params.exerciseId,
-        positive: req.body.positive,
-      })
-      .then(() => res.status(201).json())
-      .catch(err => {
-        console.log(err);
-        res.status(500).send({ err });
-      })
-);
+    create('votes', {
+      user_id: req.user.id,
+      exercise_id: req.params.exerciseId,
+      ...req.body,
+    })
+)(router);
 
-router.post(
+post(
   '/:exerciseId/comments',
   [
     authentication(true),
@@ -131,31 +84,16 @@ router.post(
     }),
     authorization('COMMENT'),
   ],
-  (req, res) => {
-    const comment = req.body;
-    db
-      .none(sql.comments.create, {
-        userId: req.user.id,
-        exerciseId: req.params.exerciseId,
-        message: comment.message,
-        pinned: comment.pinned || false,
-      })
-      .then(() => res.status(201).send({ reinforcement: req.reinforcement }))
-      .catch(err => {
-        console.log(err);
-        res.status(500).send({ err });
-      });
-  }
-);
+  (req, res) =>
+    create('comments', {
+      ...req.body,
+      user_id: req.user.id,
+      exercise_id: req.params.exerciseId,
+    })
+)(router);
 
-router.get('/:exerciseId/comments', authentication(true), (req, res) => {
-  db
-    .any(sql.comments.find, { exerciseId: req.params.exerciseId, userId: req.user.id })
-    .then(comments => res.status(200).send(normalizr.normalize(comments, [commentSchema])))
-    .catch(err => {
-      console.log(err);
-      res.status(500).send({ err });
-    });
-});
+get('/:exerciseId/comments', [authentication(true)], (req, res) =>
+  read('comments', `user_id=${req.user.id} and exercise_id=${req.params.exerciseId}`)
+)(router);
 
 module.exports = router;

@@ -72,15 +72,4 @@ router.post(
   }
 );
 
-router.delete('/:collectionId', (req, res) => {
-  db
-    .one(sql.collections.delete, {
-      collectionId: req.params.collectionId,
-    })
-    .then(result => {
-      if (!result) return res.status(404).send({ message: 'Topic not found' });
-      res.status(204).send();
-    })
-    .catch(err => res.status(500).send({ err }));
-});
 module.exports = router;
