@@ -50,39 +50,4 @@ router.delete(
   }
 );
 
-router.post('/:resource', authentication(true), async (req, res) => {
-  try {
-    const entity = req.body;
-    const result = await db.one(
-      `INSERT INTO \${table~} (${_.keys(entity)}) VALUES (${_.map(_.keys(entity), key => `\${${key}}`)}) RETURNING *`,
-      {
-        table: req.params.resource,
-        ...entity,
-      }
-    );
-    res.status(201).send(result);
-  } catch (err) {
-    console.log(err);
-    res.status(500).send({ err });
-  }
-});
-
-/*router.put('/:resource/:id', async (req, res) => {
-  try {
-    const entity = req.body;
-    const result = await db.one(
-      `update \${table~} set ${_.map(_.keys(entity), key => `${key}=\${${key}}`)} where id=\${id} RETURNING *`,
-      {
-        table: req.params.resource,
-        ...entity,
-        id: req.params.id,
-      }
-    );
-    res.status(200).send(result);
-  } catch (err) {
-    console.log(err);
-    res.status(500).send({ err });
-  }
-});*/
-
 module.exports = router;
