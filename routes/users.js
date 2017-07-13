@@ -11,10 +11,10 @@ const GRAPH_URL = 'https://graph.facebook.com',
   _ = require('underscore'),
   superagent = require('superagent-as-promised')(require('superagent'));
 
-const findValidUsername = (username, callback) =>
+const findValidUsername = username =>
   db
     .none('select * from users where username=${username}', { username })
-    .then(() => callback(null, username))
+    .then(() => username)
     .catch(err => findValidUsername(username + Math.floor(Math.random() * 10), callback));
 
 router.get('/notifications', authentication(true), (req, res) =>
@@ -42,10 +42,10 @@ post(
     required: ['deviceId'],
     properties: { deviceId: { type: 'string' } },
   }),
-  (req, res) =>
-    findValidUsername(morsommeNavn.generate(), (err, username) =>
-      create('users', { username, device_id: req.body.deviceId })
-    )
+  async (req, res) => {
+    const username = await findValidUsername(morsommeNavn.generate());
+    return create('users', { username, device_id: req.body.deviceId });
+  }
 )(router);
 
 router.post(
@@ -95,19 +95,25 @@ router.post(
       .get(`${GRAPH_URL}/me?access_token=${req.body.facebookToken}`)
       .then(res => JSON.parse(res.text).id)
       .then(facebookId =>
-        findValidUsername(morsommeNavn.generate(), (err, username) =>
-          db
-            .none(sql.users.create, { username, facebookId })
-            .then(() => {
+        findValidUsername(morsommeNavn.generate())
+          .then(username =>
+            db.none(sql.users.create, { username, facebookId }).then(() => {
+              console.log('lol');
               userService.getUser(facebookId, (err, user) => {
                 if (err) return res.status(500).send({ message: 'This should never happen' });
                 res.status(201).send(user);
               });
             })
-            .catch(err => res.status(500).send())
-        )
+          )
+          .catch(err => {
+            console.log(err);
+            res.status(500).send();
+          })
       )
-      .catch(err => res.status(400).send({ err }))
+      .catch(err => {
+        console.log(err);
+        res.status(400).send({ err });
+      })
 );
 
 router.put(

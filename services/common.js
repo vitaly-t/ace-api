@@ -9,7 +9,7 @@ export const create = (table, entity) =>
     { table, ...entity }
   );
 
-export const read = (table, where = true) => db.any(sql.common.find, { table, where });
+export const read = (table, where = true) => db.many(sql.common.find, { table, where });
 
 export const update = (table, id, entity) => {
   console.log(
@@ -26,7 +26,9 @@ export const remove = (table, id) => db.one(sql.common.delete, { table, id });
 export const get = (path, middleware, func) => router =>
   router.get(path, middleware, async (req, res) => {
     try {
+      console.log('ok');
       const result = await func(req, res);
+      console.log('ok');
       res.status(200).json(result);
     } catch (err) {
       console.log(err);

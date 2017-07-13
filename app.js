@@ -11,6 +11,10 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.use((req, res, next) => {
+  console.log(req.body);
+  next();
+});
 app.use('/', require('./routes/index'));
 app.use('/subjects', require('./routes/subjects'));
 app.use('/collections', require('./routes/collections'));

@@ -1,5 +1,8 @@
+import { create, read, update, get, put, post, del } from '../services/common.js';
 import _ from 'lodash';
 import { remove } from '../services/common.js';
+import { getUserByFacebookOrDevice } from '../services/user-service.js';
+
 const GRAPH_URL = 'https://graph.facebook.com',
   express = require('express'),
   router = express.Router(),
@@ -16,25 +19,15 @@ router.get('/me', authentication(true), (req, res) =>
     res.status(200).send(user);
   })
 );
-router.get('/token', (req, res) => {
+get('/token', [], async (req, res) => {
   const facebookToken = req.query.facebook_token;
   if (facebookToken) {
-    return superagent
-      .get(`${GRAPH_URL}/me?access_token=${facebookToken}`)
-      .then(res => JSON.parse(res.text).id)
-      .then(facebookId =>
-        userService.getUser(facebookId, (err, user) => {
-          if (err) return res.status(404).send({ message: 'User not found' });
-          res.status(200).send(user);
-        })
-      )
-      .catch(err => res.status(400).send({ err }));
+    const response = await superagent.get(`${GRAPH_URL}/me?access_token=${facebookToken}`);
+    const facebookId = JSON.parse(response.text).id;
+    return userService.getUserByFacebookOrDevice(facebookId);
   }
-  userService.getUser(req.query.device_id, (err, user) => {
-    if (err) return res.status(404).send({ message: 'User not found' });
-    res.status(200).send(user);
-  });
-});
+  return await getUserByFacebookOrDevice(req.query.device_id || req.query.facebook_token);
+})(router);
 
 router.delete(
   '/:resource/:id',
