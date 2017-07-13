@@ -11,6 +11,15 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'X-Access-Token, Origin, X-Requested-With, Content-Type, Accept, Client-Id, Platform'
+  );
+  next();
+});
 app.use('/', require('./routes/index'));
 app.use('/subjects', require('./routes/subjects'));
 app.use('/collections', require('./routes/collections'));
