@@ -1,3 +1,4 @@
+import { create, read, update, get, put, post, del } from '../services/common.js';
 const GRAPH_URL = 'https://graph.facebook.com',
   express = require('express'),
   router = express.Router(),
@@ -35,29 +36,17 @@ router.get('/notifications', authentication(true), (req, res) =>
     })
 );
 
-router.post(
+post(
   '/anonymous',
   bodyValidation({
     required: ['deviceId'],
     properties: { deviceId: { type: 'string' } },
   }),
-  (req, res) => {
+  (req, res) =>
     findValidUsername(morsommeNavn.generate(), (err, username) =>
-      db
-        .one(sql.users.createAnonymous, {
-          username,
-          deviceId: req.body.deviceId,
-        })
-        .then(() => {
-          userService.getUser(req.body.deviceId, (err, user) => {
-            if (err) return res.status(500).send({ message: 'This should never happen' });
-            res.status(201).send(user);
-          });
-        })
-        .catch(err => res.status(500).send())
-    );
-  }
-);
+      create('users', { username, device_id: req.body.deviceId })
+    )
+)(router);
 
 router.post(
   '/facebook_connection',

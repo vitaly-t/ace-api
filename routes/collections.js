@@ -1,3 +1,4 @@
+import { create, read, update, get, put, post, del } from '../services/common.js';
 const express = require('express'),
   router = express.Router(),
   _ = require('underscore'),
@@ -23,19 +24,14 @@ router.get('/:collectionId/exercises', (req, res) => {
     .catch(err => res.status(500).send({ err }));
 });
 
-router.get('/:collectionId/quiz', authentication(true), (req, res) =>
-  db
-    .any(sql.collections.quiz, {
-      collectionId: req.params.collectionId,
-      userId: req.user.id,
-      size: parseInt(req.query.size) || 6,
-    })
-    .then(exercises => res.status(200).send(normalizr.normalize(exercises, [exerciseSchema])))
-    .catch(err => {
-      console.log(err);
-      res.status(500).send({ err });
-    })
-);
+get('/:collectionId/quiz', [authentication(true)], async (req, res) => {
+  const exercises = await db.any(sql.collections.quiz, {
+    collectionId: req.params.collectionId,
+    userId: req.user.id,
+    size: parseInt(req.query.size) || 6,
+  });
+  return normalizr.normalize(exercises, [exerciseSchema]);
+})(router);
 
 router.post(
   '/:collectionId/exercises',
