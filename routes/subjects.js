@@ -15,18 +15,13 @@ const express = require('express'),
     topics: [collectionSchema],
   });
 
-router.get('/:subjectId/exercises', authentication(true), async (req, res) => {
-  try {
-    const exercises = await db.any(sql.common.findAll, {
-      table: 'v_exercises',
-      where: `subject_id=${req.params.subjectId} and updated_by=${req.user.id}`,
-    });
-    res.status(200).send(normalizr.normalize(exercises, [exerciseSchema]));
-  } catch (err) {
-    console.log(err);
-    res.status(500).send({ err });
-  }
-});
+get('/:subjectId/exercises', authentication(true), async (req, res) => {
+  const result = await read(
+    'v_exercises',
+    `subject_id=${req.params.subjectId} and updated_by=${req.user.id}`
+  );
+  return normalizr.normalize(result, [exerciseSchema]);
+})(router);
 
 router.get('/:subjectId/feed', authentication(true), (req, res) =>
   db
