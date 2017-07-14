@@ -9,9 +9,10 @@ export const create = (table, entity) =>
     { table, ...entity }
   );
 
-export const read = (table, where = true) => db.many(sql.common.find, { table, where });
+export const read = (table, where = true) => db.any(sql.common.find, { table, where });
 
 export const update = (table, id, entity) => {
+  console.log('ENTITY', entity);
   console.log(
     `update \${table~} set ${_.map(_.keys(entity), key => `${key}=\${${key}}`)} where id=\${id} RETURNING *`
   );

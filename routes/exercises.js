@@ -14,6 +14,7 @@ const express = require('express'),
 
 get('/:exerciseId', [], async (req, res) => {
   const result = await read('v_exercises', `id=${req.params.exerciseId}`);
+  console.log(result);
   return normalizr.normalize(result[0], exerciseSchema);
 })(router);
 
@@ -92,8 +93,12 @@ post(
     })
 )(router);
 
-get('/:exerciseId/comments', [authentication(true)], (req, res) =>
-  read('comments', `user_id=${req.user.id} and exercise_id=${req.params.exerciseId}`)
-)(router);
+get('/:exerciseId/comments', [authentication(true)], async (req, res) => {
+  const result = await db.any(sql.comments.find, {
+    userId: req.user.id,
+    exerciseId: req.params.exerciseId,
+  });
+  return normalizr.normalize(result, [commentSchema]);
+})(router);
 
 module.exports = router;

@@ -1,3 +1,4 @@
+import { create, read, update, get, put, post, del } from '../services/common.js';
 const express = require('express'),
   router = express.Router(),
   normalizr = require('normalizr'),
@@ -57,7 +58,7 @@ router.put('/:subjectId/order', (req, res) => {
     });
 });
 
-/*router.post('/', authentication(true), (req, res) =>
+router.post('/', authentication(true), (req, res) =>
   db
     .one(
       "insert into subjects (code, name, published) values (${code}, ${name}, 'yes') returning *",
@@ -75,7 +76,7 @@ router.put('/:subjectId/order', (req, res) => {
       console.log(err);
       res.status(500).send({ err });
     })
-);*/
+);
 
 router.post('/:subjectId/collections', authentication(true), (req, res) =>
   db
@@ -170,16 +171,6 @@ router.post(
   }
 );
 
-/*router.put('/:subjectId', (req, res) =>
-  db
-    .none(sql.subjects.update, {
-      code: req.body.code,
-      name: req.body.name,
-      description: req.body.description,
-      subjectId: req.params.subjectId,
-    })
-    .then(() => res.status(204).send())
-    .catch(err => res.status(500).send({ err }))
-);*/
+put('/:subjectId', [], req => update('subjects', req.params.subjectId, req.body))(router);
 
 module.exports = router;
