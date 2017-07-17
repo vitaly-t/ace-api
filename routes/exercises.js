@@ -1,4 +1,4 @@
-import { create, read, update, get, put, post, del } from '../services/common.js';
+import { create, read, readOne, update, get, put, post, del } from '../services/common.js';
 const express = require('express'),
   router = express.Router(),
   _ = require('underscore'),
@@ -13,9 +13,8 @@ const express = require('express'),
   commentSchema = new normalizr.schema.Entity('comments');
 
 get('/:exerciseId', [], async (req, res) => {
-  const result = await read('v_exercises', `id=${req.params.exerciseId}`);
-  console.log(result);
-  return normalizr.normalize(result[0], exerciseSchema);
+  const result = await readOne('v_exercises', `id=${req.params.exerciseId}`);
+  return normalizr.normalize(result, exerciseSchema);
 })(router);
 
 post(

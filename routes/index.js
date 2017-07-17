@@ -21,12 +21,12 @@ router.get('/me', authentication(true), (req, res) =>
 );
 get('/token', [], async (req, res) => {
   const facebookToken = req.query.facebook_token;
+  let facebookId;
   if (facebookToken) {
     const response = await superagent.get(`${GRAPH_URL}/me?access_token=${facebookToken}`);
-    const facebookId = JSON.parse(response.text).id;
-    return userService.getUserByFacebookOrDevice(facebookId);
+    facebookId = JSON.parse(response.text).id;
   }
-  return await getUserByFacebookOrDevice(req.query.device_id || req.query.facebook_token);
+  return await getUserByFacebookOrDevice(req.query.device_id || facebookId);
 })(router);
 
 router.delete(

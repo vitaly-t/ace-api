@@ -22,8 +22,10 @@ module.exports = willStop => (req, res, next) => {
     console.log(err);
     if (err)
       return willStop ? res.status(401).send({ message: 'X-Access-Token is not valid' }) : next();
+    console.log('Decoded', decoded);
     findUser(decoded.user.id, (err, user) => {
       if (err) return res.status(404).send({ message: 'Cannot find user' });
+      console.log('USER', user);
       req.user = user;
       next();
     });

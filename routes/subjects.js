@@ -110,15 +110,13 @@ router.get('/default', authentication(false), (req, res) =>
   res.redirect(`/subjects/${process.env.DEFAULT_SUBJECT_ID}`)
 );
 
-router.get('/:subjectId', authentication(true), (req, res) =>
-  db
-    .one(sql.subjects.findById, {
-      subjectId: req.params.subjectId,
-      userId: req.user.id,
-    })
-    .then(subject => res.status(200).send(normalizr.normalize(subject, subjectSchema)))
-    .catch(err => res.status(500).send({ message: 'Could not fetch subject', err }))
-);
+get('/:subjectId', authentication(true), async (req, res) => {
+  const result = await db.one(sql.subjects.findById, {
+    subjectId: req.params.subjectId,
+    userId: req.user.id,
+  });
+  return normalizr.normalize(result, subjectSchema);
+})(router);
 
 router.get('/:subjectId/quiz', authentication(true), (req, res) =>
   db

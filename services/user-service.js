@@ -1,4 +1,4 @@
-import { create, read, update, get, put, post, del } from './common.js';
+import { create, read, readOne, update, get, put, post, del } from './common.js';
 const express = require('express'),
   db = require('db'),
   sql = require('../services/sql'),
@@ -6,10 +6,12 @@ const express = require('express'),
   jwt = require('jsonwebtoken');
 
 export const getUserByFacebookOrDevice = async id => {
-  const result = await read('users_view', `device_id='${id}' or facebook_id='${id}'`);
-  const token = jwt.sign({ user: result[0] }, process.env.SECRET, { expiresIn: '30 days' });
-  console.log({ user: result[0], token });
-  return { user: result[0], token };
+  console.log('ID', id);
+  const result = await readOne('users', `device_id='${id}' or facebook_id='${id}'`);
+  console.log('RESULT', result);
+  const token = jwt.sign({ user: result }, process.env.SECRET, { expiresIn: '30 days' });
+  console.log({ user: result, token });
+  return { user: result, token };
 };
 
 export const getUser = (facebookIdOrDeviceId, callback) =>

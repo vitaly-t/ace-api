@@ -23,7 +23,6 @@ router.post(
     }),
   ],
   (req, res) => {
-    console.log(req.body);
     db
       .tx(t =>
         t.batch(

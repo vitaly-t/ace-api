@@ -1,3 +1,4 @@
+import { create, read, update, get, put, post, del } from '../services/common.js';
 const express = require('express'),
   router = express.Router(),
   normalizr = require('normalizr'),
@@ -11,15 +12,10 @@ const express = require('express'),
   subjectSchema = new normalizr.schema.Entity('courses'),
   schoolSchema = new normalizr.schema.Entity('schools');
 
-router.get('/', (req, res) =>
-  db
-    .any('select * from schools')
-    .then(schools => res.status(200).send(normalizr.normalize(schools, [schoolSchema])))
-    .catch(err => {
-      console.log(err);
-      res.status(500).send({ err });
-    })
-);
+get('/', [], async (req, res) => {
+  const result = await read('schools');
+  return normalizr.normalize(result, [schoolSchema]);
+})(router);
 
 router.get('/:schoolId/subjects', [authentication(true)], (req, res) =>
   db
