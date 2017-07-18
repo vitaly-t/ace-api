@@ -17,24 +17,19 @@ const findValidUsername = username =>
     .then(() => username)
     .catch(err => findValidUsername(username + Math.floor(Math.random() * 10), callback));
 
-router.get('/notifications', authentication(true), (req, res) =>
-  db
-    .any(sql.users.notifications, {
-      userId: req.user.id,
-      lastChecked: req.user.last_checked_notifications,
-    })
-    .then(feed =>
-      db
-        .none('update users set last_checked_notifications=now() where id=${userId}', {
-          userId: req.user.id,
-        })
-        .then(() => res.status(200).send(_.map(feed, a => a.activity)))
-    )
-    .catch(err => {
-      console.log(err);
-      res.status(500).send({ err });
-    })
-);
+get('/notifications', authentication(true), async (req, res) => {
+  const result = await db.any(sql.users.notifications, {
+    userId: req.user.id,
+    lastChecked: req.user.last_checked_notifications,
+  });
+  return _.map(result, a => a.activity);
+})(router);
+
+put('/notifications', authentication(true), (req, res) =>
+  db.one('update users set last_checked_notifications=now() where id=${userId} returning *', {
+    userId: req.user.id,
+  })
+)(router);
 
 post(
   '/anonymous',

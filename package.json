@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node --harmony ./bin/www"
+    "start": "node --harmony ./bin/www",
+    "lol": "nodemon --harmony ./bin/www"
   },
   "engines": {
     "node": "8.1.4",
