@@ -2,7 +2,6 @@ const _ = require('lodash');
 const express = require('express');
 const db = require('db');
 const sql = require('../services/sql');
-const lol = { ...{ hei: 'hei' } };
 
 module.exports.create = (table, entity) =>
   db.one(
