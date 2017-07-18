@@ -1,11 +1,11 @@
-import { create, read, readOne, update, get, put, post, del } from './common.js';
+const { create, read, readOne, update, get, put, post, del } = require('./common.js');
 const express = require('express'),
   db = require('db'),
   sql = require('../services/sql'),
   _ = require('lodash'),
   jwt = require('jsonwebtoken');
 
-export const getUserByFacebookOrDevice = async id => {
+module.exports.getUserByFacebookOrDevice = async id => {
   console.log('ID', id);
   const result = await readOne('users', `device_id='${id}' or facebook_id='${id}'`);
   console.log('RESULT', result);
@@ -14,7 +14,7 @@ export const getUserByFacebookOrDevice = async id => {
   return { user: result, token };
 };
 
-export const getUser = (facebookIdOrDeviceId, callback) =>
+module.exports.getUser = (facebookIdOrDeviceId, callback) =>
   db
     .one(sql.users.findOne, { id: facebookIdOrDeviceId })
     .then(user => {

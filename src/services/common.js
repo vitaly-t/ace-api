@@ -1,31 +1,31 @@
-import _ from 'lodash';
-import express from 'express';
-import db from 'db';
-import sql from '../services/sql';
+const _ = require('lodash');
+const express = require('express');
+const db = require('db');
+const sql = require('../services/sql');
 
-export const create = (table, entity) =>
+module.exports.create = (table, entity) =>
   db.one(
     `INSERT INTO \${table~} (${_.keys(entity)}) VALUES (${_.map(_.keys(entity), key => `\${${key}}`)}) RETURNING *`,
-    { table, ...entity }
+    Object.assign({}, { table }, entity)
   );
 
-export const read = (table, where = true) => db.many(sql.common.find, { table, where });
-export const readOne = (table, where = true) => db.one(sql.common.find, { table, where });
+module.exports.read = (table, where = true) => db.many(sql.common.find, { table, where });
+module.exports.readOne = (table, where = true) => db.one(sql.common.find, { table, where });
 
-export const update = (table, id, entity) => {
+module.exports.update = (table, id, entity) => {
   console.log('ENTITY', entity);
   console.log(
     `update \${table~} set ${_.map(_.keys(entity), key => `${key}=\${${key}}`)} where id=\${id} RETURNING *`
   );
   return db.one(
     `update \${table~} set ${_.map(_.keys(entity), key => `${key}=\${${key}}`)} where id=\${id} RETURNING *`,
-    { table, id, ...entity }
+    Object.assign({}, { id, table }, entity)
   );
 };
 
-export const remove = (table, id) => db.one(sql.common.delete, { table, id });
+module.exports.remove = (table, id) => db.one(sql.common.delete, { table, id });
 
-export const get = (path, middleware, func) => router =>
+module.exports.get = (path, middleware, func) => router =>
   router.get(path, middleware, async (req, res) => {
     try {
       const result = await func(req, res);
@@ -36,7 +36,7 @@ export const get = (path, middleware, func) => router =>
     }
   });
 
-export const put = (path, middleware, func) => router =>
+module.exports.put = (path, middleware, func) => router =>
   router.put(path, middleware, async (req, res) => {
     try {
       const result = await func(req, res);
@@ -47,7 +47,7 @@ export const put = (path, middleware, func) => router =>
     }
   });
 
-export const post = (path, middleware, func) => router =>
+module.exports.post = (path, middleware, func) => router =>
   router.post(path, middleware, async (req, res) => {
     try {
       const result = await func(req, res);
@@ -58,7 +58,7 @@ export const post = (path, middleware, func) => router =>
     }
   });
 
-export const del = (path, middleware, func) => router =>
+module.exports.del = (path, middleware, func) => router =>
   router.delete(path, middleware, async (req, res) => {
     try {
       const result = await func(req, res);

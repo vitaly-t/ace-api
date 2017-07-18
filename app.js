@@ -21,13 +21,13 @@ app.use((req, res, next) => {
   console.log(req.body);
   next();
 });
-app.use('/', require('./dist/routes/index'));
-app.use('/subjects', require('./dist/routes/subjects'));
-app.use('/collections', require('./dist/routes/collections'));
-app.use('/exercises', require('./dist/routes/exercises'));
-app.use('/users', require('./dist/routes/users'));
-app.use('/answers', require('./dist/routes/answers'));
-app.use('/comments', require('./dist/routes/comments'));
-app.use('/schools', require('./dist/routes/schools'));
+app.use('/', require('./src/routes/index'));
+app.use('/subjects', require('./src/routes/subjects'));
+app.use('/collections', require('./src/routes/collections'));
+app.use('/exercises', require('./src/routes/exercises'));
+app.use('/users', require('./src/routes/users'));
+app.use('/answers', require('./src/routes/answers'));
+app.use('/comments', require('./src/routes/comments'));
+app.use('/schools', require('./src/routes/schools'));
 
 module.exports = app;

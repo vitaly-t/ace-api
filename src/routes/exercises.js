@@ -1,4 +1,4 @@
-import { create, read, readOne, update, get, put, post, del } from '../services/common.js';
+const { create, read, readOne, update, get, put, post, del } = require('../services/common.js');
 const express = require('express'),
   router = express.Router(),
   _ = require('underscore'),
@@ -24,11 +24,10 @@ post(
     bodyValidation({ required: ['message'], properties: { message: { type: 'string' } } }),
   ],
   (req, res) =>
-    create('reports', {
-      exercise_id: req.params.exerciseId,
-      user_id: req.user.id,
-      ...req.body,
-    })
+    create(
+      'reports',
+      Object.assign({}, { exercise_id: req.params.exerciseId, user_id: req.user.id }, req.body)
+    )
 )(router);
 
 post(
@@ -66,11 +65,17 @@ post(
     authorization('VOTE_EXERCISE'),
   ],
   (req, res) =>
-    create('votes', {
-      user_id: req.user.id,
-      exercise_id: req.params.exerciseId,
-      ...req.body,
-    })
+    create(
+      'votes',
+      Object.assign(
+        {},
+        {
+          user_id: req.user.id,
+          exercise_id: req.params.exerciseId,
+        },
+        req.body
+      )
+    )
 )(router);
 
 post(
@@ -85,11 +90,10 @@ post(
     authorization('COMMENT'),
   ],
   (req, res) =>
-    create('comments', {
-      ...req.body,
-      user_id: req.user.id,
-      exercise_id: req.params.exerciseId,
-    })
+    create(
+      'comments',
+      Object.assign({}, { user_id: req.user.id, exercise_id: req.params.exerciseId }, req.body)
+    )
 )(router);
 
 get('/:exerciseId/comments', [authentication(true)], async (req, res) => {

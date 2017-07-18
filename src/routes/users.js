@@ -1,4 +1,4 @@
-import { create, read, update, get, put, post, del } from '../services/common.js';
+const { create, read, readOne, update, get, put, post, del } = require('../services/common.js');
 const GRAPH_URL = 'https://graph.facebook.com',
   express = require('express'),
   router = express.Router(),

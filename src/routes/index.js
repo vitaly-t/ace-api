@@ -1,7 +1,7 @@
-import { create, read, update, get, put, post, del } from '../services/common.js';
-import _ from 'lodash';
-import { remove } from '../services/common.js';
-import { getUserByFacebookOrDevice } from '../services/user-service.js';
+const { create, read, update, get, put, post, del } = require('../services/common.js');
+const _ = require('lodash');
+const { remove } = require('../services/common.js');
+const { getUserByFacebookOrDevice } = require('../services/user-service.js');
 
 const GRAPH_URL = 'https://graph.facebook.com',
   express = require('express'),
