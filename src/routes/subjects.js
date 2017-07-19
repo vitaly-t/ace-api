@@ -75,7 +75,7 @@ router.post('/', authentication(true), (req, res) =>
 
 router.post('/:subjectId/collections', authentication(true), (req, res) =>
   db
-    .one('insert into collections (name, subject_id) values (${name},${subjectId}) returning id', {
+    .one('insert into collections (name, subject_id) values (${name},${subjectId}) returning *', {
       name: req.body.name,
       subjectId: req.params.subjectId,
     })
