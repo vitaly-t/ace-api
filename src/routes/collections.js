@@ -33,39 +33,28 @@ get('/:collectionId/quiz', [authentication(true)], async (req, res) => {
   return normalizr.normalize(exercises, [exerciseSchema]);
 })(router);
 
-router.post(
+post(
   '/:collectionId/exercises',
   [
     authentication(true),
     bodyValidation(exercisesService.validExerciseSchema),
     authorization('CREATE_EXERCISE'),
   ],
-  (req, res) => {
+  async (req, res) => {
     const content = req.body;
-    const exercise = { content };
-    exercise.isFeasible = ajv.validate(exercisesService.feasibleExerciseSchema, content);
-    exercise.collectionId = req.params.collectionId;
-    exercise.userId = req.user.id;
-    db
-      .one(sql.collections.insertExercise, exercise)
-      .then(exercise =>
-        db
-          .none(sql.exercises.vote, {
-            userId: req.user.id,
-            exerciseId: exercise.id,
-            positive: true,
-          })
-          .then(() => res.status(201).json())
-          .catch(err => {
-            console.log(err);
-            res.status(500).send({ err });
-          })
-      )
-      .catch(err => {
-        console.log(err);
-        res.status(500).send({ err });
-      });
+    const exercise = await db.one(sql.collections.insertExercise, {
+      content,
+      isFeasible: ajv.validate(exercisesService.feasibleExerciseSchema, content),
+      collectionId: req.params.collectionId,
+      userId: req.user.id,
+    });
+    await db.none(sql.exercises.vote, {
+      userId: req.user.id,
+      exerciseId: exercise.id,
+      positive: true,
+    });
+    return exercise;
   }
-);
+)(router);
 
 module.exports = router;
