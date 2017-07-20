@@ -31,7 +31,7 @@ get('/token', [], async (req, res) => {
 
 router.delete(
   '/:resource/:id',
-  [authentication(true), checkParams('resource', ['subjects', 'collections'])],
+  [authentication(true), checkParams('resource', ['subjects', 'collections', 'exercises'])],
   async (req, res) => {
     try {
       const result = await remove(req.params.resource, req.params.id);
