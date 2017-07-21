@@ -129,15 +129,13 @@ router.get('/:subjectId/quiz', authentication(true), (req, res) =>
     .catch(err => res.status(500).send({ err }))
 );
 
-router.get('/:subjectId/collections', authentication(true), (req, res) =>
-  db
-    .any(sql.subjects.findCollections, {
-      userId: req.user.id,
-      subjectId: req.params.subjectId,
-    })
-    .then(collections => res.status(200).send(normalizr.normalize(collections, [collectionSchema])))
-    .catch(err => res.status(500).send({ err }))
-);
+get('/:subjectId/collections', authentication(true), async (req, res) => {
+  const result = await db.any(sql.subjects.findCollections, {
+    userId: req.user.id,
+    subjectId: req.params.subjectId,
+  });
+  return normalizr.normalize(result, [collectionSchema]);
+})(router);
 
 router.post(
   '/favorites',
