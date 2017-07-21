@@ -34,7 +34,6 @@ router.get('/:subjectId/feed', authentication(true), (req, res) =>
 );
 
 router.put('/:subjectId/order', (req, res) => {
-  console.log(req.body);
   db
     .tx(t =>
       t.batch(

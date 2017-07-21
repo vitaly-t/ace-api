@@ -6,11 +6,8 @@ const express = require('express'),
   jwt = require('jsonwebtoken');
 
 module.exports.getUserByFacebookOrDevice = async id => {
-  console.log('ID', id);
   const result = await readOne('users', `device_id='${id}' or facebook_id='${id}'`);
-  console.log('RESULT', result);
   const token = jwt.sign({ user: result }, process.env.SECRET, { expiresIn: '30 days' });
-  console.log({ user: result, token });
   return { user: result, token };
 };
 

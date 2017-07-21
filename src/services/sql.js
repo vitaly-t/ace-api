@@ -51,6 +51,7 @@ module.exports = {
     notifications: sql('../../sql/users/notifications.sql'),
     createAnonymous: sql('../../sql/users/create-anonymous.sql'),
     connectAnonToFace: sql('../../sql/users/connect-anon-to-face.sql'),
+    contribution: sql('../../sql/users/contribution.sql'),
   },
   comments: {
     create: sql('../../sql/comments/create.sql'),

@@ -18,7 +18,7 @@ app.use((req, res, next) => {
     'Access-Control-Allow-Headers',
     'X-Access-Token, Origin, X-Requested-With, Content-Type, Accept, Client-Id, Platform'
   );
-  console.log('*********BODY*************', req.body);
+  //console.log('*********BODY*************\n', req.body);
   next();
 });
 app.use('/', require('./src/routes/index'));

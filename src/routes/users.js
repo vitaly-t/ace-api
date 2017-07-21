@@ -17,6 +17,11 @@ const findValidUsername = username =>
     .then(() => username)
     .catch(err => findValidUsername(username + Math.floor(Math.random() * 10), callback));
 
+get('/contribution', authentication(true), async (req, res) => {
+  const result = await db.any(sql.users.contribution, { userId: req.user.id });
+  return _.map(result, a => a.activity);
+})(router);
+
 get('/notifications', authentication(true), async (req, res) => {
   const result = await db.any(sql.users.notifications, {
     userId: req.user.id,
@@ -93,7 +98,6 @@ router.post(
         findValidUsername(morsommeNavn.generate())
           .then(username =>
             db.none(sql.users.create, { username, facebookId }).then(() => {
-              console.log('lol');
               userService.getUser(facebookId, (err, user) => {
                 if (err) return res.status(500).send({ message: 'This should never happen' });
                 res.status(201).send(user);

@@ -1,4 +1,4 @@
-select * from (select time, row_to_json(row) as activity from (
+select activity from (select time, row_to_json(row) as activity from (
   select 
     'COMMENT_YOUR_EXERCISE' as type, 
     comments.created as time, 
@@ -29,7 +29,7 @@ select time, row_to_json(row) as activity from (
   from comments 
     join users_view users on user_id=users.id
     join exercises on exercise_id=exercises.id 
-  where comments.exercise_id in (select exercise_id from comments where user_id=${userId} ) and comments.user_id <> ${userId}
+  where comments.exercise_id in (select exercise_id from comments where user_id=${userId} ) and comments.user_id <> ${userId} and comments.created > (select min(created) from comments where user_id=${userId})
 ) row
 ) lol 
 order by time desc
