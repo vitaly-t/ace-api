@@ -1,4 +1,21 @@
-select * from (select time, row_to_json(row) as activity from (
+select * from (
+  
+select time, row_to_json(row) as activity from (
+  select 
+    'CREATE_TOPIC' as type,
+    collections.created as time,
+    collections.id as collection_id,
+    collections.name as collection_name,
+    users.username,
+    users.experience
+  from collections
+    join users_view users on user_id=users.id
+  where subject_id=${subjectId}
+) row
+
+union all
+
+select time, row_to_json(row) as activity from (
   select 
     'COMMENT' as type, 
     comments.created as time, 

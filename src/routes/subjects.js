@@ -52,35 +52,15 @@ router.put('/:subjectId/order', (req, res) => {
     });
 });
 
-router.post('/', authentication(true), (req, res) =>
-  db
-    .one(
-      "insert into subjects (code, name, published) values (${code}, ${name}, 'yes') returning *",
-      req.body
-    )
-    .then(subject =>
-      db
-        .none('insert into favorites (user_id, subject_id) values (${userId}, ${subjectId})', {
-          userId: req.user.id,
-          subjectId: subject.id,
-        })
-        .then(() => res.status(201).send(subject))
-    )
-    .catch(err => {
-      console.log(err);
-      res.status(500).send({ err });
-    })
-);
+post('/', authentication(true), async (req, res) => {
+  const subject = await create('subjects', { ...req.body, published: 'yes', user_id: req.user.id });
+  await create('favorites', { user_id: req.user.id, subject_id: subject.id });
+  return subject;
+})(router);
 
-router.post('/:subjectId/collections', authentication(true), (req, res) =>
-  db
-    .one('insert into collections (name, subject_id) values (${name},${subjectId}) returning *', {
-      name: req.body.name,
-      subjectId: req.params.subjectId,
-    })
-    .then(row => res.status(201).send(row))
-    .catch(err => res.status(500).send({ err }))
-);
+post('/:subjectId/collections', authentication(true), (req, res) =>
+  create('collections', { ...req.body, subject_id: req.params.subjectId, user_id: req.user.id })
+)(router);
 
 router.get('/:subjectId/ranking', (req, res) => {
   db

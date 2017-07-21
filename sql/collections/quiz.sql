@@ -2,6 +2,7 @@ select
     exercises.id,
     collection_id,
     subject_id,
+    exercises.user_id,
     username,
     experience,
     json_agg(exercises.content)->0 as content,

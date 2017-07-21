@@ -51,6 +51,7 @@ module.exports.post = (path, middleware, func) => router =>
   router.post(path, middleware, async (req, res) => {
     try {
       const result = await func(req, res);
+      console.log('POST result', result);
       res.status(201).json({ result, activity: req.activity });
     } catch (err) {
       console.log(err);
