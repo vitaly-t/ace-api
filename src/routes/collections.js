@@ -15,6 +15,10 @@ const express = require('express'),
   exerciseSchema = new normalizr.schema.Entity('exercises'),
   collectionSchema = new normalizr.schema.Entity('topics', { exercises: [exerciseSchema] });
 
+put('/:collectionId', authentication(true), (req, res) =>
+  update('collections', req.params.collectionId, { ...req.body })
+)(router);
+
 router.get('/:collectionId/exercises', (req, res) => {
   db
     .any(sql.collections.findExercises, {
