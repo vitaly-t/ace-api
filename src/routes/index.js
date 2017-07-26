@@ -31,14 +31,27 @@ get('/token', [], async (req, res) => {
   return await getUserByFacebookOrDevice(req.query.device_id || facebookId);
 })(router);
 
-post('/:resource/:id/comments', authentication(true), req =>
-  db.one(sql.common.comment, {
+/*post('/:resource/:id/comments', authentication(true), async req =>{
+  const comment = await db.one(sql.common.comment, {
     message: req.body.message,
     userId: req.user.id,
     resourceType: `${_.initial(req.params.resource).join('')}_id`,
     resource: req.params.id,
   })
-)(router);
+    await db.one(sql.common.publish, {
+      activity: `COMMENT_${_.initial(req.params.resource).join('')}_id`',
+      publisherType: 'exercise_id',
+      publisher: comment.exercise_id,
+      userId: req.user.id,
+    });
+    await db.none(sql.common.subscribe, {
+      publisherType: 'exercise_id',
+      publisher: req.params.exerciseId,
+      subscriberType: 'user_id',
+      subscriber: req.user.id,
+    });
+  return comment;
+})(router);*/
 
 get('/:resource/:id/comments', authentication(true), async req => {
   const result = await read(
