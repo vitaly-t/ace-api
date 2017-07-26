@@ -10,6 +10,7 @@ const GRAPH_URL = 'https://graph.facebook.com',
   db = require('db'),
   sql = require('../services/sql'),
   authentication = require('../middleware/user-authentication'),
+  authorization = require('../middleware/authorization'),
   normalizr = require('normalizr'),
   checkParams = require('../middleware/check-params'),
   commentSchema = new normalizr.schema.Entity('comments'),
@@ -31,16 +32,27 @@ get('/token', [], async (req, res) => {
   return await getUserByFacebookOrDevice(req.query.device_id || facebookId);
 })(router);
 
-/*post('/:resource/:id/comments', authentication(true), async req =>{
-  const comment = await db.one(sql.common.comment, {
-    message: req.body.message,
-    userId: req.user.id,
-    resourceType: `${_.initial(req.params.resource).join('')}_id`,
-    resource: req.params.id,
-  })
+/*post(
+  '/:resource/:id/comments',
+  [
+    authentication(true),
+    (req, res, next) =>
+      authorization(`COMMENT_${_.upperCase(_.initial(req.params.resource).join(''))}`)(
+        req,
+        res,
+        next
+      ),
+  ],
+  async req => {
+    const comment = await db.one(sql.common.comment, {
+      message: req.body.message,
+      userId: req.user.id,
+      resourceType: `${_.initial(req.params.resource).join('')}_id`,
+      resource: req.params.id,
+    });
     await db.one(sql.common.publish, {
-      activity: `COMMENT_${_.initial(req.params.resource).join('')}_id`',
-      publisherType: 'exercise_id',
+      activity: `COMMENT_${_.upperCase(_.initial(req.params.resource).join(''))}`,
+      publisherType: `${_.initial(req.params.resource).join('')}_id`,
       publisher: comment.exercise_id,
       userId: req.user.id,
     });
@@ -50,16 +62,17 @@ get('/token', [], async (req, res) => {
       subscriberType: 'user_id',
       subscriber: req.user.id,
     });
-  return comment;
-})(router);*/
+    return comment;
+  }
+)(router);*/
 
-get('/:resource/:id/comments', authentication(true), async req => {
+/*get('/:resource/:id/comments', authentication(true), async req => {
   const result = await read(
     'comments',
     `resource_id=(select resources.id from resources join ${req.params.resource} on ${_.initial(req.params.resource).join('')}_id=${req.params.resource}.id where ${req.params.resource}.id=${req.params.id})`
   );
   return normalizr.normalize(result, [commentSchema]);
-})(router);
+})(router);*/
 
 router.delete(
   '/:resource/:id',
