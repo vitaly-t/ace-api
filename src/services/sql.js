@@ -9,6 +9,10 @@ module.exports = {
     find: sql('../../sql/common/find.sql'),
     delete: sql('../../sql/common/delete.sql'),
     create: sql('../../sql/common/create.sql'),
+    subscribe: sql('../../sql/common/subscribe.sql'),
+    publish: sql('../../sql/common/publish.sql'),
+    notifications: sql('../../sql/common/notifications.sql'),
+    comment: sql('../../sql/common/comment.sql'),
   },
   answers: {
     postAnswers: sql('../../sql/answers/post-answers.sql'),

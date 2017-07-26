@@ -10,7 +10,9 @@ const GRAPH_URL = 'https://graph.facebook.com',
   db = require('db'),
   sql = require('../services/sql'),
   authentication = require('../middleware/user-authentication'),
+  normalizr = require('normalizr'),
   checkParams = require('../middleware/check-params'),
+  commentSchema = new normalizr.schema.Entity('comments'),
   userService = require('../services/user-service');
 
 router.get('/me', authentication(true), (req, res) =>
@@ -27,6 +29,23 @@ get('/token', [], async (req, res) => {
     facebookId = JSON.parse(response.text).id;
   }
   return await getUserByFacebookOrDevice(req.query.device_id || facebookId);
+})(router);
+
+post('/:resource/:id/comments', authentication(true), req =>
+  db.one(sql.common.comment, {
+    message: req.body.message,
+    userId: req.user.id,
+    resourceType: `${_.initial(req.params.resource).join('')}_id`,
+    resource: req.params.id,
+  })
+)(router);
+
+get('/:resource/:id/comments', authentication(true), async req => {
+  const result = await read(
+    'comments',
+    `resource_id=(select resources.id from resources join ${req.params.resource} on ${_.initial(req.params.resource).join('')}_id=${req.params.resource}.id where ${req.params.resource}.id=${req.params.id})`
+  );
+  return normalizr.normalize(result, [commentSchema]);
 })(router);
 
 router.delete(

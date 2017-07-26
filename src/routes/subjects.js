@@ -1,4 +1,14 @@
-const { create, read, readOne, update, get, put, post, del } = require('../services/common.js');
+const {
+  create,
+  read,
+  readOne,
+  update,
+  get,
+  put,
+  post,
+  del,
+  getNotifications,
+} = require('../services/common.js');
 const express = require('express'),
   router = express.Router(),
   normalizr = require('normalizr'),
@@ -23,15 +33,9 @@ get('/:subjectId/exercises', authentication(true), async (req, res) => {
   return normalizr.normalize(result, [exerciseSchema]);
 })(router);
 
-router.get('/:subjectId/feed', authentication(true), (req, res) =>
-  db
-    .any(sql.subjects.feed, { subjectId: req.params.subjectId })
-    .then(feed => res.status(200).send(_.map(feed, a => a.activity)))
-    .catch(err => {
-      console.log(err);
-      res.status(500).send({ err });
-    })
-);
+get('/:subjectId/feed', authentication(true), req =>
+  getNotifications('subject_id', req.params.subjectId)
+)(router);
 
 router.put('/:subjectId/order', (req, res) => {
   db
@@ -58,9 +62,28 @@ post('/', authentication(true), async (req, res) => {
   return subject;
 })(router);
 
-post('/:subjectId/collections', authentication(true), (req, res) =>
-  create('collections', { ...req.body, subject_id: req.params.subjectId, user_id: req.user.id })
-)(router);
+post('/:subjectId/collections', authentication(true), async (req, res) => {
+  const collection = await create('collections', {
+    ...req.body,
+    subject_id: req.params.subjectId,
+    user_id: req.user.id,
+  });
+  await Promise.all([
+    db.one(sql.common.publish, {
+      activity: 'CREATE_TOPIC',
+      publisherType: 'collection_id',
+      publisher: collection.id,
+      userId: req.user.id,
+    }),
+    db.none(sql.common.subscribe, {
+      publisherType: 'collection_id',
+      publisher: collection.id,
+      subscriberType: 'user_id',
+      subscriber: req.user.id,
+    }),
+  ]);
+  return collection;
+})(router);
 
 router.get('/:subjectId/ranking', (req, res) => {
   db

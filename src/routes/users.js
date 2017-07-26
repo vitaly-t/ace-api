@@ -1,4 +1,14 @@
-const { create, read, readOne, update, get, put, post, del } = require('../services/common.js');
+const {
+  create,
+  read,
+  readOne,
+  update,
+  get,
+  put,
+  post,
+  del,
+  getNotifications,
+} = require('../services/common.js');
 const GRAPH_URL = 'https://graph.facebook.com',
   express = require('express'),
   router = express.Router(),
@@ -22,13 +32,9 @@ get('/contribution', authentication(true), async (req, res) => {
   return _.map(result, a => a.activity);
 })(router);
 
-get('/notifications', authentication(true), async (req, res) => {
-  const result = await db.any(sql.users.notifications, {
-    userId: req.user.id,
-    lastChecked: req.user.last_checked_notifications,
-  });
-  return _.map(result, a => a.activity);
-})(router);
+get('/notifications', authentication(true), (req, res) =>
+  getNotifications('user_id', req.user.id, req.user.id, req.user.last_checked_notifications)
+)(router);
 
 put('/notifications', authentication(true), (req, res) =>
   db.one('update users set last_checked_notifications=now() where id=${userId} returning *', {

@@ -50,11 +50,25 @@ post(
 put(
   '/:exerciseId',
   [authentication(true), bodyValidation(exerciseService.validExerciseSchema)],
-  (req, res) =>
-    update('exercises', req.params.exerciseId, {
+  async (req, res) => {
+    const exercise = await update('exercises', req.params.exerciseId, {
       updated_by: req.user.id,
       content: req.body,
-    })
+    });
+    await db.one(sql.common.publish, {
+      activity: 'EDIT_EXERCISE',
+      publisherType: 'exercise_id',
+      publisher: req.params.exerciseId,
+      userId: req.user.id,
+    });
+    await db.none(sql.common.subscribe, {
+      publisherType: 'exercise_id',
+      publisher: req.params.exerciseId,
+      subscriberType: 'user_id',
+      subscriber: req.user.id,
+    });
+    return exercise;
+  }
 )(router);
 
 post(
@@ -89,11 +103,26 @@ post(
     }),
     authorization('COMMENT'),
   ],
-  (req, res) =>
-    create(
-      'comments',
-      Object.assign({}, { user_id: req.user.id, exercise_id: req.params.exerciseId }, req.body)
-    )
+  async (req, res) => {
+    const comment = await create('comments', {
+      user_id: req.user.id,
+      exercise_id: req.params.exerciseId,
+      ...req.body,
+    });
+    await db.one(sql.common.publish, {
+      activity: 'COMMENT_EXERCISE',
+      publisherType: 'exercise_id',
+      publisher: comment.exercise_id,
+      userId: req.user.id,
+    });
+    await db.none(sql.common.subscribe, {
+      publisherType: 'exercise_id',
+      publisher: req.params.exerciseId,
+      subscriberType: 'user_id',
+      subscriber: req.user.id,
+    });
+    return comment;
+  }
 )(router);
 
 get('/:exerciseId/comments', [authentication(true)], async (req, res) => {
