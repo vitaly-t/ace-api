@@ -21,6 +21,7 @@ const express = require('express'),
   authorization = require('../middleware/authorization'),
   exerciseSchema = new normalizr.schema.Entity('exercises'),
   collectionSchema = new normalizr.schema.Entity('topics'),
+  commentSchema = new normalizr.schema.Entity('comments'),
   subjectSchema = new normalizr.schema.Entity('courses', {
     topics: [collectionSchema],
   });
@@ -165,5 +166,50 @@ router.post(
 );
 
 put('/:subjectId', [], req => update('subjects', req.params.subjectId, req.body))(router);
+
+post(
+  '/:subjectId/comments',
+  [
+    authentication(true),
+    bodyValidation({
+      type: 'object',
+      required: ['message'],
+      properties: { message: { type: 'string' } },
+    }),
+    authorization('COMMENT'),
+  ],
+  async (req, res) => {
+    const comment = await db.one(sql.common.comment, {
+      message: req.body.message,
+      userId: req.user.id,
+      resourceType: 'subject_id',
+      resource: req.params.subjectId,
+    });
+    await db.one(sql.common.publish, {
+      activity: 'COMMENT_COURSE',
+      publisherType: 'subject_id',
+      publisher: req.params.subjectId,
+      userId: req.user.id,
+    });
+    await db.none(sql.common.subscribe, {
+      publisherType: 'subject_id',
+      publisher: req.params.subjectId,
+      subscriberType: 'user_id',
+      subscriber: req.user.id,
+    });
+    return comment;
+  }
+)(router);
+
+get('/:subjectId/comments', [authentication(true)], async (req, res) => {
+  console.log(
+    `resource_id=(select resources.id from resources join subjects on subject_id=subjects.id where subjects.id=${req.params.subjectId})`
+  );
+  const result = await read(
+    'comments',
+    `resource_id=(select resources.id from resources join subjects on subject_id=subjects.id where subjects.id=${req.params.subjectId})`
+  );
+  return normalizr.normalize(result, [commentSchema]);
+})(router);
 
 module.exports = router;

@@ -101,6 +101,39 @@ post(
       required: ['message'],
       properties: { message: { type: 'string' } },
     }),
+    authorization('COMMENT_EXERCISE'),
+  ],
+  async (req, res) => {
+    const comment = await db.one(sql.common.comment, {
+      message: req.body.message,
+      userId: req.user.id,
+      resourceType: 'exercise_id',
+      resource: req.params.exerciseId,
+    });
+    await db.one(sql.common.publish, {
+      activity: 'COMMENT_COURSE',
+      publisherType: 'exercise_id',
+      publisher: req.params.exerciseId,
+      userId: req.user.id,
+    });
+    await db.none(sql.common.subscribe, {
+      publisherType: 'exercise_id',
+      publisher: req.params.exerciseId,
+      subscriberType: 'user_id',
+      subscriber: req.user.id,
+    });
+    return comment;
+  }
+)(router);
+/*post(
+  '/:exerciseId/comments',
+  [
+    authentication(true),
+    bodyValidation({
+      type: 'object',
+      required: ['message'],
+      properties: { message: { type: 'string' } },
+    }),
     authorization('COMMENT'),
   ],
   async (req, res) => {
@@ -123,7 +156,7 @@ post(
     });
     return comment;
   }
-)(router);
+)(router);*/
 
 get('/:exerciseId/comments', [authentication(true)], async (req, res) => {
   const result = await db.any(sql.comments.find, {

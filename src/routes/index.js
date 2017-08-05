@@ -32,6 +32,8 @@ get('/token', [], async (req, res) => {
   return await getUserByFacebookOrDevice(req.query.device_id || facebookId);
 })(router);
 
+get('/activities', [], req => read('activities'))(router);
+
 /*post(
   '/:resource/:id/comments',
   [
