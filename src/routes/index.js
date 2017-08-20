@@ -32,7 +32,7 @@ get('/token', [], async (req, res) => {
   return await getUserByFacebookOrDevice(req.query.device_id || facebookId);
 })(router);
 
-get('/activities', [], req => read('activities'))(router);
+get('/levels', [], () => db.any(sql.common.levels))(router);
 
 /*post(
   '/:resource/:id/comments',

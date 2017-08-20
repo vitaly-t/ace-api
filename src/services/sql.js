@@ -13,6 +13,7 @@ module.exports = {
     publish: sql('../../sql/common/publish.sql'),
     notifications: sql('../../sql/common/notifications.sql'),
     comment: sql('../../sql/common/comment.sql'),
+    levels: sql('../../sql/common/levels.sql'),
   },
   answers: {
     postAnswers: sql('../../sql/answers/post-answers.sql'),
