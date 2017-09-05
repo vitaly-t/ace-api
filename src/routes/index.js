@@ -68,13 +68,10 @@ get('/levels', [], () => db.any(sql.common.levels))(router);
   }
 )(router);*/
 
-/*get('/:resource/:id/comments', authentication(true), async req => {
-  const result = await read(
-    'comments',
-    `resource_id=(select resources.id from resources join ${req.params.resource} on ${_.initial(req.params.resource).join('')}_id=${req.params.resource}.id where ${req.params.resource}.id=${req.params.id})`
-  );
+get('/resources/:resourceId/comments', authentication(true), async req => {
+  const result = await read('comments', `resource_id=${req.params.resourceId}`);
   return normalizr.normalize(result, [commentSchema]);
-})(router);*/
+})(router);
 
 router.delete(
   '/:resource/:id',

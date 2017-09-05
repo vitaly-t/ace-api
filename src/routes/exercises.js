@@ -111,7 +111,7 @@ post(
       resource: req.params.exerciseId,
     });
     await db.one(sql.common.publish, {
-      activity: 'COMMENT_COURSE',
+      activity: 'COMMENT_EXERCISE',
       publisherType: 'exercise_id',
       publisher: req.params.exerciseId,
       userId: req.user.id,
@@ -125,6 +125,13 @@ post(
     return comment;
   }
 )(router);
+
+get('/:exerciseId/comments', [], async (req, res) => {
+  const result = await db.any(
+    `select comments.* from resources join comments on resources.id=resource_id where resources.exercise_id=${req.params.exerciseId} order by comments.created desc`
+  );
+  return normalizr.normalize(result, [commentSchema]);
+})(router);
 /*post(
   '/:exerciseId/comments',
   [

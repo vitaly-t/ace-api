@@ -72,14 +72,11 @@ post('/:subjectId/collections', authentication(true), async (req, res) => {
   await Promise.all([
     db.one(sql.common.publish, {
       activity: 'CREATE_TOPIC',
-      publisherType: 'collection_id',
       publisher: collection.id,
       userId: req.user.id,
     }),
     db.none(sql.common.subscribe, {
-      publisherType: 'collection_id',
       publisher: collection.id,
-      subscriberType: 'user_id',
       subscriber: req.user.id,
     }),
   ]);

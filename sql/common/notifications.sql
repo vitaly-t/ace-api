@@ -14,8 +14,8 @@ from notifications
   join subscriptions on subscriptions.publisher=notifications.publisher
   join resources sub on subscriber=sub.id
   join resources pub on subscriptions.publisher=pub.id
-  left join exercises on pub.exercise_id=exercises.id
-  left join collections on pub.collection_id=collections.id
-  left join subjects on pub.subject_id=subjects.id
-where sub.${subscriberType~}=${subscriber} and users.id <> ${userId}
+  left join exercises on pub.id=exercises.id
+  left join collections on pub.id=collections.id
+  left join subjects on pub.id=subjects.id
+where sub.id=${subscriber} and users.id <> ${userId}
 order by notifications.created desc;
