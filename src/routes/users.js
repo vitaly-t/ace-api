@@ -121,25 +121,4 @@ router.post(
       })
 );
 
-router.put(
-  '/me',
-  [
-    bodyValidation({
-      required: ['lastSubjectId'],
-      properties: {
-        lastSubjectId: { type: 'integer' },
-      },
-    }),
-    authentication,
-  ],
-  (req, res) =>
-    db
-      .one('update users set last_subject_id=${lastSubjectId} where id=${userId} returning *', {
-        lastSubjectId: req.body.lastSubjectId,
-        userId: req.user.id,
-      })
-      .then(row => res.redirect(303, `/subjects/${req.body.lastSubjectId}`))
-      .catch(err => res.status(500).send({ err, message: "Couldn't update lastSubjectId" }))
-);
-
 module.exports = router;

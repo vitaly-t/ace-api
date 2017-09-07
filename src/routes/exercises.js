@@ -66,4 +66,15 @@ post(
     })
 )(router);
 
+post('/:exerciseId/votes', authentication, async req => {
+  await create('votes', {
+    user_id: req.user.id,
+    resource_id: req.params.exerciseId,
+    positive: req.body.positive,
+  });
+  const result = await readOne('v_resource_vote_count', `resource_id=${req.params.exerciseId}`);
+  if (result.votes >= 4) await update('exercises', req.params.exerciseId, { is_approved: true });
+  else if (result.votes <= -4) await delete ('exercises', `id=${req.params.exerciseId}`);
+})(router);
+
 module.exports = router;

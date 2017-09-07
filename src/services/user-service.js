@@ -11,8 +11,17 @@ module.exports.getUserByFacebookOrDevice = async id => {
   return { user: result, token };
 };
 
-module.exports.getUser = (facebookIdOrDeviceId, callback) =>
-  db
+module.exports.getUser = async facebookIdOrDeviceId => {
+  const user = await readOne(
+    'v_users',
+    `facebook_id=${facebookIdOrDeviceId.toString()} or device_id=${facebookIdOrDeviceId.toString()} or id=${parseInt(facebookIdOrDeviceId)}`
+  );
+  const token = jwt.sign({ user }, process.env.SECRET, {
+    expiresIn: '30 days',
+  });
+  return { user, token };
+};
+/*db
     .one(sql.users.findOne, { id: facebookIdOrDeviceId })
     .then(user => {
       const token = jwt.sign({ user }, process.env.SECRET, {
@@ -23,4 +32,4 @@ module.exports.getUser = (facebookIdOrDeviceId, callback) =>
     .catch(err => {
       console.log(err);
       callback(new Error('User not found'));
-    });
+    });*/

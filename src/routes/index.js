@@ -2,6 +2,7 @@ const {
   commentResource,
   create,
   read,
+  readOne,
   update,
   get,
   put,
@@ -15,6 +16,7 @@ const { getUserByFacebookOrDevice } = require('../services/user-service.js');
 const GRAPH_URL = 'https://graph.facebook.com',
   express = require('express'),
   router = express.Router(),
+  jwt = require('jsonwebtoken'),
   superagent = require('superagent-as-promised')(require('superagent')),
   db = require('db'),
   sql = require('../services/sql'),
@@ -24,12 +26,12 @@ const GRAPH_URL = 'https://graph.facebook.com',
   commentSchema = new normalizr.schema.Entity('comments'),
   userService = require('../services/user-service');
 
-router.get('/me', authentication, (req, res) =>
-  userService.getUser(req.user.id.toString(), (err, user) => {
-    if (err) return res.status(404).send({ message: 'User not found' });
-    res.status(200).send(user);
-  })
-);
+get('/me', authentication, async req => {
+  const user = await readOne('v_users', `id=${req.user.id}`);
+  const token = jwt.sign({ user }, process.env.SECRET, { expiresIn: '30 days' });
+  return { user, token };
+})(router);
+
 get('/token', [], async (req, res) => {
   const facebookToken = req.query.facebook_token;
   let facebookId;
