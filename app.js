@@ -29,5 +29,6 @@ app.use('/users', require('./src/routes/users'));
 app.use('/answers', require('./src/routes/answers'));
 app.use('/comments', require('./src/routes/comments'));
 app.use('/schools', require('./src/routes/schools'));
+app.use('/resources', require('./src/routes/resources'));
 
 module.exports = app;

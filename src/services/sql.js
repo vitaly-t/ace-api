@@ -14,6 +14,7 @@ module.exports = {
     notifications: sql('../../sql/common/notifications.sql'),
     comment: sql('../../sql/common/comment.sql'),
     levels: sql('../../sql/common/levels.sql'),
+    readComments: sql('../../sql/common/read-comments.sql'),
   },
   answers: {
     postAnswers: sql('../../sql/answers/post-answers.sql'),

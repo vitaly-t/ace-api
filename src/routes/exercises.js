@@ -17,23 +17,39 @@ get('/:exerciseId', [], async (req, res) => {
   return normalizr.normalize(result, exerciseSchema);
 })(router);
 
-post(
-  '/:exerciseId/reports',
-  [
-    authentication(true),
-    bodyValidation({ required: ['message'], properties: { message: { type: 'string' } } }),
-  ],
-  (req, res) =>
-    create(
-      'reports',
-      Object.assign({}, { exercise_id: req.params.exerciseId, user_id: req.user.id }, req.body)
-    )
-)(router);
+put('/:exerciseId/', authentication, async req => {
+  const result = await update('exercises', req.params.exerciseId, { content: req.body });
+  await create('notifications', {
+    publisher: result.id,
+    activity: 'MODIFY_EXERCISE',
+    message: `${req.user.username} modified the exercise '${result.content.question.text}'`,
+    link: `/exercises/${result.id}`,
+    user_id: req.user.id,
+  });
+  return result;
+})(router);
+
+post('/:exerciseId/comments', authentication, async req => {
+  const exercise = await readOne('exercises', `id=${req.params.exerciseId}`);
+  const result = await create('comments', {
+    message: req.body.message,
+    resource_id: req.params.exerciseId,
+    user_id: req.user.id,
+  });
+  await create('notifications', {
+    publisher: req.params.exerciseId,
+    activity: `COMMENT_EXERCISE`,
+    message: `${req.user.username} commented on the exercise '${exercise.content.question.text}'`,
+    link: `/exercises/${exercise.id}`,
+    user_id: req.user.id,
+  });
+  return result;
+})(router);
 
 post(
   '/:exerciseId/answers',
   [
-    authentication(true),
+    authentication,
     bodyValidation({
       required: ['answer_status'],
       properties: { answer_status: { type: 'boolean' } },
@@ -46,131 +62,5 @@ post(
       exercise_id: req.params.exerciseId,
     })
 )(router);
-
-put(
-  '/:exerciseId',
-  [authentication(true), bodyValidation(exerciseService.validExerciseSchema)],
-  async (req, res) => {
-    const exercise = await update('exercises', req.params.exerciseId, {
-      updated_by: req.user.id,
-      content: req.body,
-    });
-    await db.one(sql.common.publish, {
-      activity: 'EDIT_EXERCISE',
-      publisherType: 'exercise_id',
-      publisher: req.params.exerciseId,
-      userId: req.user.id,
-    });
-    await db.none(sql.common.subscribe, {
-      publisherType: 'exercise_id',
-      publisher: req.params.exerciseId,
-      subscriberType: 'user_id',
-      subscriber: req.user.id,
-    });
-    return exercise;
-  }
-)(router);
-
-post(
-  '/:exerciseId/votes',
-  [
-    authentication(true),
-    bodyValidation({ required: ['positive'], properties: { positive: { type: 'boolean' } } }),
-    authorization('VOTE_EXERCISE'),
-  ],
-  (req, res) =>
-    create(
-      'votes',
-      Object.assign(
-        {},
-        {
-          user_id: req.user.id,
-          exercise_id: req.params.exerciseId,
-        },
-        req.body
-      )
-    )
-)(router);
-
-post(
-  '/:exerciseId/comments',
-  [
-    authentication(true),
-    bodyValidation({
-      type: 'object',
-      required: ['message'],
-      properties: { message: { type: 'string' } },
-    }),
-    authorization('COMMENT_EXERCISE'),
-  ],
-  async (req, res) => {
-    const comment = await db.one(sql.common.comment, {
-      message: req.body.message,
-      userId: req.user.id,
-      resourceType: 'exercise_id',
-      resource: req.params.exerciseId,
-    });
-    await db.one(sql.common.publish, {
-      activity: 'COMMENT_EXERCISE',
-      publisherType: 'exercise_id',
-      publisher: req.params.exerciseId,
-      userId: req.user.id,
-    });
-    await db.none(sql.common.subscribe, {
-      publisherType: 'exercise_id',
-      publisher: req.params.exerciseId,
-      subscriberType: 'user_id',
-      subscriber: req.user.id,
-    });
-    return comment;
-  }
-)(router);
-
-get('/:exerciseId/comments', [], async (req, res) => {
-  const result = await db.any(
-    `select comments.* from resources join comments on resources.id=resource_id where resources.exercise_id=${req.params.exerciseId} order by comments.created desc`
-  );
-  return normalizr.normalize(result, [commentSchema]);
-})(router);
-/*post(
-  '/:exerciseId/comments',
-  [
-    authentication(true),
-    bodyValidation({
-      type: 'object',
-      required: ['message'],
-      properties: { message: { type: 'string' } },
-    }),
-    authorization('COMMENT'),
-  ],
-  async (req, res) => {
-    const comment = await create('comments', {
-      user_id: req.user.id,
-      exercise_id: req.params.exerciseId,
-      ...req.body,
-    });
-    await db.one(sql.common.publish, {
-      activity: 'COMMENT_EXERCISE',
-      publisherType: 'exercise_id',
-      publisher: comment.exercise_id,
-      userId: req.user.id,
-    });
-    await db.none(sql.common.subscribe, {
-      publisherType: 'exercise_id',
-      publisher: req.params.exerciseId,
-      subscriberType: 'user_id',
-      subscriber: req.user.id,
-    });
-    return comment;
-  }
-)(router);*/
-
-get('/:exerciseId/comments', [authentication(true)], async (req, res) => {
-  const result = await db.any(sql.comments.find, {
-    userId: req.user.id,
-    exerciseId: req.params.exerciseId,
-  });
-  return normalizr.normalize(result, [commentSchema]);
-})(router);
 
 module.exports = router;

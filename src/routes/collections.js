@@ -1,4 +1,5 @@
 const {
+  createResource,
   create,
   read,
   readOne,
@@ -11,9 +12,7 @@ const {
 } = require('../services/common.js');
 const express = require('express'),
   router = express.Router(),
-  _ = require('underscore'),
-  Ajv = require('ajv'),
-  ajv = new Ajv(),
+  _ = require('lodash'),
   normalizr = require('normalizr'),
   bodyValidation = require('body-validation'),
   authentication = require('../middleware/user-authentication'),
@@ -25,29 +24,29 @@ const express = require('express'),
   exerciseSchema = new normalizr.schema.Entity('exercises'),
   collectionSchema = new normalizr.schema.Entity('topics', { exercises: [exerciseSchema] });
 
-get('/:collectionId', authentication(true), async req => {
+get('/:collectionId', authentication, async req => {
   const collection = await readOne('collections', `id=${req.params.collectionId}`);
   return normalizr.normalize(collection, collectionSchema);
 })(router);
 
-get('/:collectionId/feed', authentication(true), req =>
-  getNotifications('collection_id', req.params.collectionId)
-)(router);
+put('/:collectionId', authentication, async req => {
+  const result = await update('collections', req.params.collectionId, { ...req.body });
+  create('notifications', {
+    publisher: result.id,
+    activity: 'MODIFY_TOPIC',
+    message: `${req.user.username} modified the topic '${result.name}'`,
+    link: `/topics/${result.id}`,
+    user_id: req.user.id,
+  });
+  return result;
+})(router);
 
-put('/:collectionId', authentication(true), (req, res) =>
-  update('collections', req.params.collectionId, { ...req.body })
-)(router);
+get('/:collectionId/exercises', authentication, async req => {
+  const result = await read('exercises', `collection_id=${req.params.collectionId}`);
+  return normalizr.normalize(result, [exerciseSchema]);
+})(router);
 
-router.get('/:collectionId/exercises', (req, res) => {
-  db
-    .any(sql.collections.findExercises, {
-      collectionId: req.params.collectionId,
-    })
-    .then(exercises => res.status(200).send(normalizr.normalize(exercises, [exerciseSchema])))
-    .catch(err => res.status(500).send({ err }));
-});
-
-get('/:collectionId/quiz', [authentication(true)], async (req, res) => {
+get('/:collectionId/quiz', [authentication], async (req, res) => {
   const exercises = await db.any(sql.collections.quiz, {
     collectionId: req.params.collectionId,
     userId: req.user.id,
@@ -59,32 +58,31 @@ get('/:collectionId/quiz', [authentication(true)], async (req, res) => {
 post(
   '/:collectionId/exercises',
   [
-    authentication(true),
+    authentication,
     bodyValidation(exercisesService.validExerciseSchema),
     authorization('CREATE_EXERCISE'),
   ],
-  async (req, res) => {
-    const exercise = await create('exercises', {
+  async req => {
+    const collection = await readOne('collections', `id=${req.params.collectionId}`);
+    const result = await create('exercises', {
       content: req.body,
       collection_id: req.params.collectionId,
-      updated_by: req.user.id,
     });
     await Promise.all([
-      create('votes', { user_id: req.user.id, exercise_id: exercise.id, positive: true }),
-      db.one(sql.common.publish, {
+      create('user_owns_resource', { user_id: req.user.id, resource_id: result.id }),
+      create('subscriptions', { subscriber: result.id, publisher: result.id }),
+      create('subscriptions', { subscriber: req.user.id, publisher: result.id }),
+      create('subscriptions', { subscriber: collection.subject_id, publisher: result.id }),
+      create('subscriptions', { subscriber: req.params.collectionId, publisher: result.id }),
+      create('notifications', {
+        publisher: result.id,
         activity: 'CREATE_EXERCISE',
-        publisherType: 'exercise_id',
-        publisher: exercise.id,
-        userId: req.user.id,
-      }),
-      db.none(sql.common.subscribe, {
-        publisherType: 'exercise_id',
-        publisher: exercise.id,
-        subscriberType: 'user_id',
-        subscriber: req.user.id,
+        message: `${req.user.username} created an exercise '${req.body.question.text}'`,
+        link: `/exercises/${result.id}`,
+        user_id: req.user.id,
       }),
     ]);
-    return exercise;
+    return result;
   }
 )(router);
 

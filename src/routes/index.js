@@ -1,4 +1,13 @@
-const { create, read, update, get, put, post, del } = require('../services/common.js');
+const {
+  commentResource,
+  create,
+  read,
+  update,
+  get,
+  put,
+  post,
+  del,
+} = require('../services/common.js');
 const _ = require('lodash');
 const { remove } = require('../services/common.js');
 const { getUserByFacebookOrDevice } = require('../services/user-service.js');
@@ -12,11 +21,10 @@ const GRAPH_URL = 'https://graph.facebook.com',
   authentication = require('../middleware/user-authentication'),
   authorization = require('../middleware/authorization'),
   normalizr = require('normalizr'),
-  checkParams = require('../middleware/check-params'),
   commentSchema = new normalizr.schema.Entity('comments'),
   userService = require('../services/user-service');
 
-router.get('/me', authentication(true), (req, res) =>
+router.get('/me', authentication, (req, res) =>
   userService.getUser(req.user.id.toString(), (err, user) => {
     if (err) return res.status(404).send({ message: 'User not found' });
     res.status(200).send(user);
@@ -34,57 +42,9 @@ get('/token', [], async (req, res) => {
 
 get('/levels', [], () => db.any(sql.common.levels))(router);
 
-/*post(
-  '/:resource/:id/comments',
-  [
-    authentication(true),
-    (req, res, next) =>
-      authorization(`COMMENT_${_.upperCase(_.initial(req.params.resource).join(''))}`)(
-        req,
-        res,
-        next
-      ),
-  ],
-  async req => {
-    const comment = await db.one(sql.common.comment, {
-      message: req.body.message,
-      userId: req.user.id,
-      resourceType: `${_.initial(req.params.resource).join('')}_id`,
-      resource: req.params.id,
-    });
-    await db.one(sql.common.publish, {
-      activity: `COMMENT_${_.upperCase(_.initial(req.params.resource).join(''))}`,
-      publisherType: `${_.initial(req.params.resource).join('')}_id`,
-      publisher: comment.exercise_id,
-      userId: req.user.id,
-    });
-    await db.none(sql.common.subscribe, {
-      publisherType: 'exercise_id',
-      publisher: req.params.exerciseId,
-      subscriberType: 'user_id',
-      subscriber: req.user.id,
-    });
-    return comment;
-  }
-)(router);*/
-
-get('/resources/:resourceId/comments', authentication(true), async req => {
-  const result = await read('comments', `resource_id=${req.params.resourceId}`);
+get('/:whatever/:resourceId/comments', authentication, async (req, res) => {
+  const result = await db.any(sql.common.readComments, { resourceId: req.params.resourceId });
   return normalizr.normalize(result, [commentSchema]);
 })(router);
-
-router.delete(
-  '/:resource/:id',
-  [authentication(true), checkParams('resource', ['subjects', 'collections', 'exercises'])],
-  async (req, res) => {
-    try {
-      const result = await remove(req.params.resource, req.params.id);
-      res.status(204).send(result);
-    } catch (err) {
-      console.log(err);
-      res.status(500).send({ err });
-    }
-  }
-);
 
 module.exports = router;

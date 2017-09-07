@@ -1,4 +1,5 @@
 const {
+  createResource,
   create,
   read,
   readOne,
@@ -13,7 +14,6 @@ const express = require('express'),
   router = express.Router(),
   normalizr = require('normalizr'),
   _ = require('lodash'),
-  assert = require('assert'),
   db = require('db'),
   sql = require('../services/sql'),
   bodyValidation = require('body-validation'),
@@ -25,18 +25,6 @@ const express = require('express'),
   subjectSchema = new normalizr.schema.Entity('courses', {
     topics: [collectionSchema],
   });
-
-get('/:subjectId/exercises', authentication(true), async (req, res) => {
-  const result = await read(
-    'v_exercises',
-    `subject_id=${req.params.subjectId} and updated_by=${req.user.id}`
-  );
-  return normalizr.normalize(result, [exerciseSchema]);
-})(router);
-
-get('/:subjectId/feed', authentication(true), req =>
-  getNotifications('subject_id', req.params.subjectId)
-)(router);
 
 router.put('/:subjectId/order', (req, res) => {
   db
@@ -57,43 +45,41 @@ router.put('/:subjectId/order', (req, res) => {
     });
 });
 
-post('/', authentication(true), async (req, res) => {
-  const subject = await create('subjects', { ...req.body, published: 'yes', user_id: req.user.id });
-  await create('favorites', { user_id: req.user.id, subject_id: subject.id });
-  return subject;
-})(router);
-
-post('/:subjectId/collections', authentication(true), async (req, res) => {
-  const collection = await create('collections', {
-    ...req.body,
-    subject_id: req.params.subjectId,
-    user_id: req.user.id,
-  });
+post('/', [authentication, authorization('CREATE_COURSE')], async req => {
+  const result = await create('subjects', req.body);
   await Promise.all([
-    db.one(sql.common.publish, {
-      activity: 'CREATE_TOPIC',
-      publisher: collection.id,
-      userId: req.user.id,
-    }),
-    db.none(sql.common.subscribe, {
-      publisher: collection.id,
-      subscriber: req.user.id,
+    create('user_owns_resource', { user_id: req.user.id, resource_id: result.id }),
+    create('subscriptions', { subscriber: req.user.id, publisher: result.id }),
+    create('subscriptions', { subscriber: result.id, publisher: result.id }),
+    create('notifications', {
+      publisher: result.id,
+      activity: 'CREATE_COURSE',
+      message: `${req.user.username} created a course '${_.truncate(req.body.name, 20)}'`,
+      link: `/courses/${result.id}`,
+      user_id: req.user.id,
     }),
   ]);
-  return collection;
 })(router);
 
-router.get('/:subjectId/ranking', (req, res) => {
-  db
-    .any(sql.subjects.ranking, { subjectId: req.params.subjectId })
-    .then(rankings => res.status(200).send(rankings))
-    .catch(err => {
-      console.log(err);
-      res.status(500).send({ err });
-    });
-});
+post('/:subjectId/collections', [authentication, authorization('CREATE_TOPIC')], async req => {
+  const result = await create('collections', { ...req.body, subject_id: req.params.subjectId });
+  await Promise.all([
+    create('user_owns_resource', { user_id: req.user.id, resource_id: result.id }),
+    create('subscriptions', { subscriber: result.id, publisher: result.id }),
+    create('subscriptions', { subscriber: req.user.id, publisher: result.id }),
+    create('subscriptions', { subscriber: req.params.subjectId, publisher: result.id }),
+    create('notifications', {
+      publisher: result.id,
+      activity: 'CREATE_TOPIC',
+      message: `${req.user.username} created a topic '${_.truncate(req.body.name, 20)}'`,
+      link: `/topics/${result.id}`,
+      user_id: req.user.id,
+    }),
+  ]);
+  return result;
+})(router);
 
-router.get('/', [authentication(true)], (req, res) =>
+router.get('/', [authentication], (req, res) =>
   db
     .any(sql.subjects.findAll, {
       userId: req.user.id,
@@ -106,11 +92,7 @@ router.get('/', [authentication(true)], (req, res) =>
     })
 );
 
-router.get('/default', authentication(false), (req, res) =>
-  res.redirect(`/subjects/${process.env.DEFAULT_SUBJECT_ID}`)
-);
-
-get('/:subjectId', authentication(true), async (req, res) => {
+get('/:subjectId', authentication, async (req, res) => {
   const result = await db.one(sql.subjects.findById, {
     subjectId: req.params.subjectId,
     userId: req.user.id,
@@ -118,19 +100,7 @@ get('/:subjectId', authentication(true), async (req, res) => {
   return normalizr.normalize(result, subjectSchema);
 })(router);
 
-router.get('/:subjectId/quiz', authentication(true), (req, res) =>
-  db
-    .any(sql.subjects.findPopularCollections, {
-      subjectId: req.params.subjectId,
-      count: 3,
-    })
-    .then(collections =>
-      res.redirect(`/collections/${_.sample(collections).id}/quiz?type=daily&size=4`)
-    )
-    .catch(err => res.status(500).send({ err }))
-);
-
-get('/:subjectId/collections', authentication(true), async (req, res) => {
+get('/:subjectId/collections', authentication, async (req, res) => {
   const result = await db.any(sql.subjects.findCollections, {
     userId: req.user.id,
     subjectId: req.params.subjectId,
@@ -141,7 +111,7 @@ get('/:subjectId/collections', authentication(true), async (req, res) => {
 router.post(
   '/favorites',
   [
-    authentication(true),
+    authentication,
     bodyValidation({
       required: ['favorite', 'subjectId'],
       properties: { favorite: { type: 'boolean' }, subjectId: { type: 'number' } },
@@ -162,12 +132,22 @@ router.post(
   }
 );
 
-put('/:subjectId', [], req => update('subjects', req.params.subjectId, req.body))(router);
+put('/:subjectId', authentication, async req => {
+  const subject = await update('subjects', req.params.subjectId, req.body);
+  create('notifications', {
+    publisher: req.params.subjectId,
+    activity: 'MODIFY_COURSE',
+    message: `${req.user.username} modified the course '${subject.name}'`,
+    link: `/courses/${subject.id}`,
+    user_id: req.user.id,
+  });
+  return subject;
+})(router);
 
 post(
   '/:subjectId/comments',
   [
-    authentication(true),
+    authentication,
     bodyValidation({
       type: 'object',
       required: ['message'],
@@ -198,7 +178,7 @@ post(
   }
 )(router);
 
-get('/:subjectId/comments', [authentication(true)], async (req, res) => {
+get('/:subjectId/comments', [authentication], async (req, res) => {
   console.log(
     `resource_id=(select resources.id from resources join subjects on subject_id=subjects.id where subjects.id=${req.params.subjectId})`
   );

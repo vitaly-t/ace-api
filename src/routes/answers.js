@@ -9,7 +9,7 @@ const express = require('express'),
 router.post(
   '/',
   [
-    authentication(true),
+    authentication,
     bodyValidation({
       type: 'array',
       items: {

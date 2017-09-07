@@ -27,16 +27,16 @@ const findValidUsername = username =>
     .then(() => username)
     .catch(err => findValidUsername(username + Math.floor(Math.random() * 10), callback));
 
-get('/contribution', authentication(true), async (req, res) => {
+get('/contribution', authentication, async (req, res) => {
   const result = await db.any(sql.users.contribution, { userId: req.user.id });
   return _.map(result, a => a.activity);
 })(router);
 
-get('/notifications', authentication(true), (req, res) =>
-  getNotifications('user_id', req.user.id, req.user.id, req.user.last_checked_notifications)
+get('/notifications', authentication, (req, res) =>
+  getNotifications(req.user.id, req.user.id, req.user.last_checked_notifications)
 )(router);
 
-put('/notifications', authentication(true), (req, res) =>
+put('/notifications', authentication, (req, res) =>
   db.one('update users set last_checked_notifications=now() where id=${userId} returning *', {
     userId: req.user.id,
   })
@@ -130,7 +130,7 @@ router.put(
         lastSubjectId: { type: 'integer' },
       },
     }),
-    authentication(true),
+    authentication,
   ],
   (req, res) =>
     db

@@ -9,7 +9,7 @@ const express = require('express'),
 router.post(
   '/:commentId/votes',
   [
-    authentication(true),
+    authentication,
     bodyValidation({
       type: 'object',
       required: ['positive'],

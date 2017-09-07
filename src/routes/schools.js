@@ -17,7 +17,7 @@ get('/', [], async (req, res) => {
   return normalizr.normalize(result, [schoolSchema]);
 })(router);
 
-router.get('/:schoolId/subjects', [authentication(true)], (req, res) =>
+router.get('/:schoolId/subjects', [authentication], (req, res) =>
   db
     .any(sql.schools.findAllSubjects, {
       userId: req.user.id,

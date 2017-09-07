@@ -5,73 +5,37 @@ const sql = require('../services/sql');
 const normalizr = require('normalizr');
 const feedSchema = new normalizr.schema.Entity('feed');
 
-module.exports.getNotifications = async (
-  subscriberType,
-  subscriber,
-  userId = 0,
-  lastChecked = 'now()'
-) => {
-  const result = await db.any(sql.common.notifications, {
-    subscriber,
-    subscriberType,
-    lastChecked,
-    userId,
-  });
-  const notifications = _.map(result, row => {
-    let generalNotification = {
-      id: row.id,
-      type: row.activity,
-      hasSeen: row.has_seen,
-      time: row.time,
-    };
-    let exerciseNotification = { link: `/exercises/${row.exercise.id}` };
-    let collectionNotification = {
-      link: `/topics/${row.collection.id}`,
-    };
-    switch (row.activity) {
-      case 'COMMENT_EXERCISE':
-        return {
-          ...generalNotification,
-          ...exerciseNotification,
-          text: `${row.user.username} commented on exercise '${row.exercise.content.question.text}'`,
-          symbol: 'comment-o',
-        };
-      case 'EDIT_EXERCISE':
-        return {
-          ...generalNotification,
-          ...exerciseNotification,
-          text: `${row.user.username} modified the exercise '${row.exercise.content.question.text}'`,
-          symbol: 'angellist',
-        };
-      case 'CREATE_EXERCISE':
-        return {
-          ...generalNotification,
-          ...exerciseNotification,
-          text: `${row.user.username} created the exercise '${row.exercise.content.question.text}'`,
-          symbol: 'tasks',
-        };
-      case 'CREATE_TOPIC':
-        return {
-          ...generalNotification,
-          ...collectionNotification,
-          text: `${row.user.username} created the topic '${row.collection.name}'`,
-          symbol: 'comment-o',
-        };
-    }
-  });
-  return normalizr.normalize(notifications, [feedSchema]);
+const getNotifications = async (subscriber, userId = 0) => {
+  const result = await db.any(sql.common.notifications, { subscriber, userId });
+  return normalizr.normalize(result, [feedSchema]);
 };
 
-module.exports.create = (table, entity) =>
+const commentResource = async (userId, resourceType, resourceId, message) => {
+  const result = await create('comments', { message, resource_id: resourceId });
+  await Promise.all([
+    db.one(sql.common.publish, {
+      activity: `COMMENT_${_.upperCase(resourceType.slice(0, -1))}`,
+      publisher: resourceId,
+      userId,
+    }),
+    await db.none(sql.common.subscribe, {
+      publisher: result.id,
+      subscriber: userId,
+    }),
+  ]);
+  return result;
+};
+
+const create = (table, entity) =>
   db.one(
     `INSERT INTO \${table~} (${_.keys(entity)}) VALUES (${_.map(_.keys(entity), key => `\${${key}}`)}) RETURNING *`,
     { table, ...entity }
   );
 
-module.exports.read = (table, where = true) => db.any(sql.common.find, { table, where });
-module.exports.readOne = (table, where = true) => db.one(sql.common.find, { table, where });
+const read = (table, where = true) => db.any(sql.common.find, { table, where });
+const readOne = (table, where = true) => db.one(sql.common.find, { table, where });
 
-module.exports.update = (table, id, entity) => {
+const update = (table, id, entity) => {
   console.log('ENTITY', entity);
   console.log(
     `update \${table~} set ${_.map(_.keys(entity), key => `${key}=\${${key}}`)} where id=\${id} RETURNING *`
@@ -82,9 +46,9 @@ module.exports.update = (table, id, entity) => {
   );
 };
 
-module.exports.remove = (table, id) => db.one(sql.common.delete, { table, id });
+const remove = (table, id) => db.one(sql.common.delete, { table, id });
 
-module.exports.get = (path, middleware, func) => router =>
+const get = (path, middleware, func) => router =>
   router.get(path, middleware, async (req, res) => {
     try {
       const result = await func(req, res);
@@ -95,7 +59,7 @@ module.exports.get = (path, middleware, func) => router =>
     }
   });
 
-module.exports.put = (path, middleware, func) => router =>
+const put = (path, middleware, func) => router =>
   router.put(path, middleware, async (req, res) => {
     try {
       const result = await func(req, res);
@@ -106,11 +70,10 @@ module.exports.put = (path, middleware, func) => router =>
     }
   });
 
-module.exports.post = (path, middleware, func) => router =>
+const post = (path, middleware, func) => router =>
   router.post(path, middleware, async (req, res) => {
     try {
       const result = await func(req, res);
-      console.log('POST result', result);
       res.status(201).json({ result, activity: req.activity });
     } catch (err) {
       console.log(err);
@@ -118,7 +81,7 @@ module.exports.post = (path, middleware, func) => router =>
     }
   });
 
-module.exports.del = (path, middleware, func) => router =>
+const del = (path, middleware, func) => router =>
   router.delete(path, middleware, async (req, res) => {
     try {
       const result = await func(req, res);
@@ -128,3 +91,17 @@ module.exports.del = (path, middleware, func) => router =>
       res.status(500).json({ err });
     }
   });
+
+module.exports = {
+  getNotifications,
+  commentResource,
+  create,
+  read,
+  readOne,
+  update,
+  remove,
+  get,
+  put,
+  post,
+  del,
+};
