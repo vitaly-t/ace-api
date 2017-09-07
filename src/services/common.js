@@ -5,8 +5,8 @@ const sql = require('../services/sql');
 const normalizr = require('normalizr');
 const feedSchema = new normalizr.schema.Entity('feed');
 
-const getNotifications = async (subscriber, userId = 0) => {
-  const result = await db.any(sql.common.notifications, { subscriber, userId });
+const getNotifications = async (subscriber, userId, excludeUserId = 0) => {
+  const result = await db.any(sql.common.notifications, { subscriber, userId, excludeUserId });
   return normalizr.normalize(result, [feedSchema]);
 };
 
@@ -26,17 +26,24 @@ const commentResource = async (userId, resourceType, resourceId, message) => {
   return result;
 };
 
-const create = (table, entity) =>
-  db.one(
-    `INSERT INTO \${table~} (${_.keys(entity)}) VALUES (${_.map(_.keys(entity), key => `\${${key}}`)}) RETURNING *`,
+const create = async (table, entity) => {
+  const result = await db.oneOrNone(
+    `INSERT INTO \${table~} (${_.keys(entity)}) VALUES (${_.map(_.keys(entity), key => `\${${key}}`)}) ON CONFLICT DO NOTHING RETURNING *;`,
     { table, ...entity }
   );
+  return (
+    result ||
+    (await db.one(
+      `SELECT * from \${table~} where ${_.map(_.keys(entity), key => `${key} = \${${key}}`).join(' and ')}`,
+      { table, ...entity }
+    ))
+  );
+};
 
 const read = (table, where = true) => db.any(sql.common.find, { table, where });
 const readOne = (table, where = true) => db.one(sql.common.find, { table, where });
 
 const update = (table, id, entity) => {
-  console.log('ENTITY', entity);
   console.log(
     `update \${table~} set ${_.map(_.keys(entity), key => `${key}=\${${key}}`)} where id=\${id} RETURNING *`
   );

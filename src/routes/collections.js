@@ -71,17 +71,17 @@ post(
     await Promise.all([
       create('user_owns_resource', { user_id: req.user.id, resource_id: result.id }),
       create('subscriptions', { subscriber: result.id, publisher: result.id }),
-      create('subscriptions', { subscriber: req.user.id, publisher: result.id }),
       create('subscriptions', { subscriber: collection.subject_id, publisher: result.id }),
       create('subscriptions', { subscriber: req.params.collectionId, publisher: result.id }),
-      create('notifications', {
-        publisher: result.id,
-        activity: 'CREATE_EXERCISE',
-        message: `${req.user.username} created an exercise '${req.body.question.text}'`,
-        link: `/exercises/${result.id}`,
-        user_id: req.user.id,
-      }),
     ]);
+    await create('notifications', {
+      publisher: result.id,
+      activity: 'CREATE_EXERCISE',
+      message: `${req.user.username} created an exercise '${req.body.question.text}'`,
+      link: `/exercises/${result.id}`,
+      user_id: req.user.id,
+    });
+    await create('subscriptions', { subscriber: req.user.id, publisher: result.id });
     return result;
   }
 )(router);

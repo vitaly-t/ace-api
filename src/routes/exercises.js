@@ -36,13 +36,16 @@ post('/:exerciseId/comments', authentication, async req => {
     resource_id: req.params.exerciseId,
     user_id: req.user.id,
   });
-  await create('notifications', {
-    publisher: req.params.exerciseId,
-    activity: `COMMENT_EXERCISE`,
-    message: `${req.user.username} commented on the exercise '${exercise.content.question.text}'`,
-    link: `/exercises/${exercise.id}`,
-    user_id: req.user.id,
-  });
+  await Promise.all([
+    create('subscriptions', { publisher: exercise.id, subscriber: req.user.id }),
+    create('notifications', {
+      publisher: req.params.exerciseId,
+      activity: `COMMENT_EXERCISE`,
+      message: `${req.user.username} commented on the exercise '${exercise.content.question.text}'`,
+      link: `/exercises/${exercise.id}`,
+      user_id: req.user.id,
+    }),
+  ]);
   return result;
 })(router);
 

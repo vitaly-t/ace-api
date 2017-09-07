@@ -1,3 +1,4 @@
+const { post, create } = require('../services/common.js');
 const express = require('express'),
   router = express.Router(),
   bodyValidation = require('body-validation'),
@@ -6,7 +7,7 @@ const express = require('express'),
   _ = require('lodash'),
   sql = require('../services/sql');
 
-router.post(
+post(
   '/',
   [
     authentication,
@@ -22,18 +23,16 @@ router.post(
       },
     }),
   ],
-  (req, res) => {
-    db
-      .tx(t =>
-        t.batch(
-          _.map(req.body, answer =>
-            t.none(sql.answers.postAnswers, _.extend(answer, { userId: req.user.id }))
-          )
-        )
+  req =>
+    Promise.all(
+      _.map(req.body, answer =>
+        create('answers', {
+          exercise_id: answer.exerciseId,
+          user_id: req.user.id,
+          status: answer.isCorrect,
+        })
       )
-      .then(data => res.status(201).send())
-      .catch(err => res.status(500).send({ err }));
-  }
-);
+    )
+)(router);
 
 module.exports = router;

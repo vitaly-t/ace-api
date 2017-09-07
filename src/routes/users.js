@@ -33,7 +33,7 @@ get('/contribution', authentication, async (req, res) => {
 })(router);
 
 get('/notifications', authentication, (req, res) =>
-  getNotifications(req.user.id, req.user.id, req.user.last_checked_notifications)
+  getNotifications(req.user.id, req.user.id, req.user.id)
 )(router);
 
 put('/notifications', authentication, (req, res) =>

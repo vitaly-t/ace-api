@@ -25,6 +25,8 @@ post('/:resourceId/votes', authentication, req =>
   })
 )(router);
 
-get('/:resourceId/feed', authentication, req => getNotifications(req.params.resourceId))(router);
+get('/:resourceId/feed', authentication, req =>
+  getNotifications(req.params.resourceId, req.user.id)
+)(router);
 
 module.exports = router;

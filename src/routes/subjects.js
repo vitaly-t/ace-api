@@ -48,34 +48,35 @@ router.put('/:subjectId/order', (req, res) => {
 post('/', [authentication, authorization('CREATE_COURSE')], async req => {
   const result = await create('subjects', req.body);
   await Promise.all([
-    create('user_owns_resource', { user_id: req.user.id, resource_id: result.id }),
-    create('subscriptions', { subscriber: req.user.id, publisher: result.id }),
     create('subscriptions', { subscriber: result.id, publisher: result.id }),
-    create('notifications', {
-      publisher: result.id,
-      activity: 'CREATE_COURSE',
-      message: `${req.user.username} created a course '${_.truncate(req.body.name, 20)}'`,
-      link: `/courses/${result.id}`,
-      user_id: req.user.id,
-    }),
+    create('user_owns_resource', { user_id: req.user.id, resource_id: result.id }),
   ]);
+  await create('notifications', {
+    publisher: result.id,
+    activity: 'CREATE_COURSE',
+    message: `${req.user.username} created a course '${_.truncate(req.body.name, 20)}'`,
+    link: `/courses/${result.id}`,
+    user_id: req.user.id,
+  });
+  await create('subscriptions', { subscriber: req.user.id, publisher: result.id });
+  return result;
 })(router);
 
 post('/:subjectId/collections', [authentication, authorization('CREATE_TOPIC')], async req => {
   const result = await create('collections', { ...req.body, subject_id: req.params.subjectId });
   await Promise.all([
-    create('user_owns_resource', { user_id: req.user.id, resource_id: result.id }),
     create('subscriptions', { subscriber: result.id, publisher: result.id }),
-    create('subscriptions', { subscriber: req.user.id, publisher: result.id }),
     create('subscriptions', { subscriber: req.params.subjectId, publisher: result.id }),
-    create('notifications', {
-      publisher: result.id,
-      activity: 'CREATE_TOPIC',
-      message: `${req.user.username} created a topic '${_.truncate(req.body.name, 20)}'`,
-      link: `/topics/${result.id}`,
-      user_id: req.user.id,
-    }),
+    create('user_owns_resource', { user_id: req.user.id, resource_id: result.id }),
   ]);
+  create('notifications', {
+    publisher: result.id,
+    activity: 'CREATE_TOPIC',
+    message: `${req.user.username} created a topic '${_.truncate(req.body.name, 20)}'`,
+    link: `/topics/${result.id}`,
+    user_id: req.user.id,
+  });
+  await create('subscriptions', { subscriber: req.user.id, publisher: result.id });
   return result;
 })(router);
 

@@ -47,4 +47,11 @@ get('/:whatever/:resourceId/comments', authentication, async (req, res) => {
   return normalizr.normalize(result, [commentSchema]);
 })(router);
 
+post('/notifications/:notificationId/seen', authentication, req =>
+  create('user_has_seen_notification', {
+    user_id: req.user.id,
+    notification_id: req.params.notificationId,
+  })
+)(router);
+
 module.exports = router;
