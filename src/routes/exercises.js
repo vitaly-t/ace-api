@@ -67,14 +67,23 @@ post(
 )(router);
 
 post('/:exerciseId/votes', authentication, async req => {
+  const exercise = await db.one(`select * from v_exercises where id=${req.params.exerciseId}`);
   await create('votes', {
     user_id: req.user.id,
-    resource_id: req.params.exerciseId,
+    resource_id: exercise.id,
     positive: req.body.positive,
   });
-  const result = await readOne('v_resource_vote_count', `resource_id=${req.params.exerciseId}`);
-  if (result.votes >= 4) await update('exercises', req.params.exerciseId, { is_approved: true });
-  else if (result.votes <= -4) await delete ('exercises', `id=${req.params.exerciseId}`);
+  const result = await readOne('v_resource_vote_count', `resource_id=${exercise.id}`);
+  if (result.votes >= 1 && !exercise.is_approved) {
+    await update('exercises', exercise.id, { is_approved: true });
+    await create('notifications', {
+      publisher: exercise.id,
+      activity: 'APPROVE_EXERCISE',
+      message: `Exercise got approved: '${exercise.content.question.text}'`,
+      link: `/exercises/${exercise.id}`,
+      user_id: exercise.user_id,
+    });
+  } else if (result.votes <= -4) await delete ('exercises', `id=${exercise.id}`);
 })(router);
 
 module.exports = router;
