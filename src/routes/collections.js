@@ -42,7 +42,7 @@ put('/:collectionId', authentication, async req => {
 })(router);
 
 get('/:collectionId/exercises', authentication, async req => {
-  const result = await read('exercises', `collection_id=${req.params.collectionId}`);
+  const result = await read('v_exercises', `collection_id=${req.params.collectionId}`);
   return normalizr.normalize(result, [exerciseSchema]);
 })(router);
 
@@ -52,6 +52,7 @@ get('/:collectionId/quiz', [authentication], async (req, res) => {
     userId: req.user.id,
     size: parseInt(req.query.size) || 6,
   });
+  console.log(exercises);
   return normalizr.normalize(exercises, [exerciseSchema]);
 })(router);
 
