@@ -50,6 +50,7 @@ post('/', [authentication, authorization('CREATE_COURSE')], async req => {
   await Promise.all([
     create('subscriptions', { subscriber: result.id, publisher: result.id }),
     create('user_owns_resource', { user_id: req.user.id, resource_id: result.id }),
+    create('favorites', { subject_id: result.id, user_id: req.user.id }),
   ]);
   await create('notifications', {
     publisher: result.id,

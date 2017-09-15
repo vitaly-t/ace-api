@@ -52,8 +52,8 @@ get('/:collectionId/quiz', [authentication], async (req, res) => {
     userId: req.user.id,
     size: parseInt(req.query.size) || 6,
   });
-  console.log(exercises);
-  return normalizr.normalize(exercises, [exerciseSchema]);
+  const processed = _.map(exercises, exercise => ({ ...exercise, content: { ...exercise.content, alternatives: _.shuffle(exercise.content.alternatives) } }));
+  return normalizr.normalize(processed, [exerciseSchema]);
 })(router);
 
 post(

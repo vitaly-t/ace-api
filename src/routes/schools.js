@@ -12,8 +12,9 @@ const express = require('express'),
   subjectSchema = new normalizr.schema.Entity('courses'),
   schoolSchema = new normalizr.schema.Entity('schools');
 
-get('/', [], async (req, res) => {
+get('/', [], async req => {
   const result = await read('schools');
+  console.log('RES',result)
   return normalizr.normalize(result, [schoolSchema]);
 })(router);
 
