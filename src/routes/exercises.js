@@ -29,7 +29,7 @@ put('/:exerciseId/', authentication, async req => {
   return result;
 })(router);
 
-post('/:exerciseId/comments', authentication, async req => {
+post('/:exerciseId/comments', [authentication, authorization('COMMENT_EXERCISE')], async req => {
   const exercise = await readOne('exercises', `id=${req.params.exerciseId}`);
   const result = await create('comments', {
     message: req.body.message,
@@ -66,7 +66,7 @@ post(
     })
 )(router);
 
-post('/:exerciseId/votes', authentication, async req => {
+post('/:exerciseId/votes', [authentication, authorization('VOTE_EXERCISE')], async req => {
   const exercise = await db.one(`select * from v_exercises where id=${req.params.exerciseId}`);
   await create('votes', {
     user_id: req.user.id,

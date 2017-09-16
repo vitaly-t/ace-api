@@ -1,3 +1,4 @@
+const { create, post } = require('../services/common.js');
 const express = require('express'),
   router = express.Router(),
   bodyValidation = require('body-validation'),
@@ -6,29 +7,23 @@ const express = require('express'),
   db = require('db'),
   sql = require('../services/sql');
 
-router.post(
+post(
   '/:commentId/votes',
   [
-    authentication,
     bodyValidation({
       type: 'object',
       required: ['positive'],
       properties: { positive: { type: 'boolean' } },
     }),
+    authentication,
     authorization('VOTE_COMMENT'),
   ],
   (req, res) =>
-    db
-      .none(sql.comments.vote, {
-        userId: req.user.id,
-        commentId: req.params.commentId,
-        positive: req.body.positive,
-      })
-      .then(() => res.status(201).json())
-      .catch(err => {
-        console.log(err);
-        res.status(500).send({ err });
-      })
-);
+    create('votes', {
+      resource_id: req.params.commentId,
+      user_id: req.user.id,
+      positive: req.body.positive,
+    })
+)(router);
 
 module.exports = router;

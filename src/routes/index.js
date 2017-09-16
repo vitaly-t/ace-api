@@ -44,8 +44,11 @@ get('/token', [], async (req, res) => {
 
 get('/levels', [], () => db.any(sql.common.levels))(router);
 
-get('/:whatever/:resourceId/comments', authentication, async (req, res) => {
-  const result = await db.any(sql.common.readComments, { resourceId: req.params.resourceId });
+get('/:whatever/:resourceId/comments', authentication, async req => {
+  const result = await db.any(sql.common.readComments, {
+    resourceId: req.params.resourceId,
+    userId: req.user.id,
+  });
   return normalizr.normalize(result, [commentSchema]);
 })(router);
 
