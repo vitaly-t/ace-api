@@ -4,6 +4,7 @@ const {
   read,
   readOne,
   update,
+  remove,
   get,
   put,
   post,
@@ -62,6 +63,10 @@ post('/', [authentication, authorization('CREATE_COURSE')], async req => {
   await create('subscriptions', { subscriber: req.user.id, publisher: result.id });
   return result;
 })(router);
+
+del('/:subjectId', [authentication, authorization('DELETE_COURSE')], req =>
+  remove('resources', req.params.subjectId)
+)(router);
 
 post('/:subjectId/collections', [authentication, authorization('CREATE_TOPIC')], async req => {
   const result = await create('collections', { ...req.body, subject_id: req.params.subjectId });
