@@ -10,7 +10,7 @@ module.exports = (req, res, next) => {
         req.user = user;
         next();
       } catch (err) {
-        res.status(404).send({ message: 'Cannot find user' });
+        res.status(401).send({ message: 'Cannot find user' });
       }
     });
   } catch (err) {
