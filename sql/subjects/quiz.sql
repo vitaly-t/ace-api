@@ -1,6 +1,9 @@
-select exercises.*, answers.status as answer_status, upvotes >= 10 as approved
-from exercises
-join collections on collection_id = collections.id
-left join answers on exercises.id = exercise_id and answers.user_id = ${userId}
-where subject_id=${subjectId} and exercises.upvotes >= 0
-order by random();
+select 
+  exercises.*,
+  (case when votes.positive is null then false else true end) as has_voted
+from v_exercises exercises
+left join votes on votes.resource_id=exercises.id and votes.user_id=${userId}
+join collections on collection_id=collections.id
+where collections.subject_id=${subjectId}
+order by random()
+limit ${size}

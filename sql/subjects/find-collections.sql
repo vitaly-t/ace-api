@@ -1,13 +1,12 @@
 select
     collections.*,
-    count(case when exercises.is_feasible then 1 end) as feasible,
-    count(case when not exercises.is_feasible then 1 end) as non_feasible,
+    count(exercises.id) as size,
     count(a) as correctly_answered
 from collections
     left join exercises on collection_id=collections.id
     left join
        (select distinct user_id, exercise_id from answers where status = true) as a
-       on exercise_id=exercises.id and user_id=${userId}
+       on exercise_id=exercises.id and a.user_id=${userId}
 where subject_id = ${subjectId}
 group by collections.id
 order by collections.position asc, collections.id desc
