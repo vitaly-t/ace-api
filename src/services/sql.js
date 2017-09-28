@@ -20,7 +20,6 @@ module.exports = {
     postAnswers: sql('../../sql/answers/post-answers.sql'),
   },
   subjects: {
-    findPopularCollections: sql('../../sql/subjects/find-popular-collections.sql'),
     findById: sql('../../sql/subjects/find-by-id.sql'),
     findAll: sql('../../sql/subjects/find-all.sql'),
     addToFavorites: sql('../../sql/subjects/add-to-favorites.sql'),

@@ -74,6 +74,13 @@ post('/:exerciseId/votes', [authentication, authorization('VOTE_EXERCISE')], asy
     positive: req.body.positive,
   });
   const result = await readOne('v_resource_vote_count', `resource_id=${exercise.id}`);
+  await create('notifications', {
+    publisher: exercise.id,
+    activity: 'VOTE_EXERCISE',
+    message: `Someone ${req.body.positive ? 'upvoted' : 'downvoted'} exercise: '${exercise.content.question.text}'`,
+    link: `/exercises/${exercise.id}`,
+    user_id: exercise.user_id,
+  });
   if (result.votes >= 1 && !exercise.is_approved) {
     await update('exercises', exercise.id, { is_approved: true });
     await create('notifications', {

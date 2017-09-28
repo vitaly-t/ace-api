@@ -25,7 +25,9 @@ const express = require('express'),
   collectionSchema = new normalizr.schema.Entity('topics', { exercises: [exerciseSchema] });
 
 get('/:collectionId', authentication, async req => {
-  const collection = await readOne('collections', `id=${req.params.collectionId}`);
+  const collection = await db.one(sql.collections.findById, {
+    collectionId: req.params.collectionId,
+  });
   return normalizr.normalize(collection, collectionSchema);
 })(router);
 
@@ -52,7 +54,10 @@ get('/:collectionId/quiz', [authentication], async (req, res) => {
     userId: req.user.id,
     size: parseInt(req.query.size) || 6,
   });
-  const processed = _.map(exercises, exercise => ({ ...exercise, content: { ...exercise.content, alternatives: _.shuffle(exercise.content.alternatives) } }));
+  const processed = _.map(exercises, exercise => ({
+    ...exercise,
+    content: { ...exercise.content, alternatives: _.shuffle(exercise.content.alternatives) },
+  }));
   return normalizr.normalize(processed, [exerciseSchema]);
 })(router);
 

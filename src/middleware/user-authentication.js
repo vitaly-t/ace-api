@@ -7,6 +7,7 @@ module.exports = (req, res, next) => {
       if (err) return res.status(401).send({ message: 'X-Access-Token is not valid' });
       try {
         const user = await readOne('v_users', `id=${decoded.user.id}`);
+        console.log(user.username);
         req.user = user;
         next();
       } catch (err) {

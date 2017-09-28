@@ -27,6 +27,19 @@ const express = require('express'),
     topics: [collectionSchema],
   });
 
+get('/:subjectId/quiz', [authentication], async req => {
+  const exercises = await db.any(sql.subjects.quiz, {
+    userId: req.user.id,
+    subjectId: req.params.subjectId,
+    size: req.query.size || 6,
+  });
+  const processed = _.map(exercises, exercise => ({
+    ...exercise,
+    content: { ...exercise.content, alternatives: _.shuffle(exercise.content.alternatives) },
+  }));
+  return normalizr.normalize(processed, [exerciseSchema]);
+})(router);
+
 router.put('/:subjectId/order', (req, res) => {
   db
     .tx(t =>
@@ -86,18 +99,14 @@ post('/:subjectId/collections', [authentication, authorization('CREATE_TOPIC')],
   return result;
 })(router);
 
-router.get('/', [authentication], (req, res) =>
-  db
-    .any(sql.subjects.findAll, {
-      userId: req.user.id,
-      search: req.query.search || '',
-    })
-    .then(subjects => res.status(200).send(normalizr.normalize(subjects, [subjectSchema])))
-    .catch(err => {
-      console.log(err);
-      res.status(500).send({ err });
-    })
-);
+get('/', [authentication], async req => {
+  const result = await db.any(sql.subjects.findAll, {
+    userId: req.user.id,
+    search: req.query.search || '',
+  });
+  console.log(result);
+  return normalizr.normalize(result, [subjectSchema]);
+})(router);
 
 get('/:subjectId', authentication, async (req, res) => {
   const result = await db.one(sql.subjects.findById, {
