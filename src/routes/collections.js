@@ -4,6 +4,7 @@ const {
   read,
   readOne,
   update,
+  remove,
   get,
   put,
   post,
@@ -91,5 +92,12 @@ post(
     return result;
   }
 )(router);
+
+del('/:collectionId', [authentication], async req => {
+  const collection = await db.one(sql.collections.findById, {
+    collectionId: req.params.collectionId,
+  });
+  if (collection.user_id === req.user.id) remove('resources', req.params.collectionId);
+})(router);
 
 module.exports = router;

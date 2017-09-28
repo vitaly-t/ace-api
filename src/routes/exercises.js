@@ -1,4 +1,14 @@
-const { create, read, readOne, update, get, put, post, del } = require('../services/common.js');
+const {
+  create,
+  read,
+  readOne,
+  update,
+  remove,
+  get,
+  put,
+  post,
+  del,
+} = require('../services/common.js');
 const express = require('express'),
   router = express.Router(),
   _ = require('underscore'),
@@ -91,6 +101,11 @@ post('/:exerciseId/votes', [authentication, authorization('VOTE_EXERCISE')], asy
       user_id: exercise.user_id,
     });
   } else if (result.votes <= -4) await delete ('exercises', `id=${exercise.id}`);
+})(router);
+
+del('/:exerciseId', [authentication], async req => {
+  const exercise = await readOne('v_exercises', `id=${req.params.exerciseId}`);
+  if (exercise.user_id === req.user.id) remove('resources', req.params.exerciseId);
 })(router);
 
 module.exports = router;

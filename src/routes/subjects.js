@@ -77,9 +77,13 @@ post('/', [authentication, authorization('CREATE_COURSE')], async req => {
   return result;
 })(router);
 
-del('/:subjectId', [authentication, authorization('DELETE_COURSE')], req =>
-  remove('resources', req.params.subjectId)
-)(router);
+del('/:subjectId', [authentication], async req => {
+  const subject = await db.one(sql.subjects.findById, {
+    subjectId: req.params.subjectId,
+    userId: req.user.id,
+  });
+  if (subject.user_id === req.user.id) remove('resources', req.params.subjectId);
+})(router);
 
 post('/:subjectId/collections', [authentication, authorization('CREATE_TOPIC')], async req => {
   const result = await create('collections', { ...req.body, subject_id: req.params.subjectId });
