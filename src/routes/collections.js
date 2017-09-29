@@ -37,7 +37,7 @@ put('/:collectionId', authentication, async req => {
   create('notifications', {
     publisher: result.id,
     activity: 'MODIFY_TOPIC',
-    message: `${req.user.username} modified the topic '${result.name}'`,
+    message: `${req.user.username} endret temaet '${result.name}'`,
     link: `/topics/${result.id}`,
     user_id: req.user.id,
   });
@@ -84,7 +84,7 @@ post(
     await create('notifications', {
       publisher: result.id,
       activity: 'CREATE_EXERCISE',
-      message: `${req.user.username} created an exercise '${req.body.question.text}'`,
+      message: `${req.user.username} lagde et spørsmål: '${req.body.question.text}'`,
       link: `/exercises/${result.id}`,
       user_id: req.user.id,
     });

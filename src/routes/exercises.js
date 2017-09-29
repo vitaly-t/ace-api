@@ -32,7 +32,7 @@ put('/:exerciseId/', authentication, async req => {
   await create('notifications', {
     publisher: result.id,
     activity: 'MODIFY_EXERCISE',
-    message: `${req.user.username} modified the exercise '${result.content.question.text}'`,
+    message: `${req.user.username} endret spørsmålet '${result.content.question.text}'`,
     link: `/exercises/${result.id}`,
     user_id: req.user.id,
   });
@@ -51,7 +51,7 @@ post('/:exerciseId/comments', [authentication, authorization('COMMENT_EXERCISE')
     create('notifications', {
       publisher: req.params.exerciseId,
       activity: `COMMENT_EXERCISE`,
-      message: `${req.user.username} commented on the exercise '${exercise.content.question.text}'`,
+      message: `${req.user.username} kommenterte på spørsmålet '${exercise.content.question.text}'`,
       link: `/exercises/${exercise.id}`,
       user_id: req.user.id,
     }),
@@ -87,7 +87,7 @@ post('/:exerciseId/votes', [authentication, authorization('VOTE_EXERCISE')], asy
   await create('notifications', {
     publisher: exercise.id,
     activity: 'VOTE_EXERCISE',
-    message: `Someone ${req.body.positive ? 'upvoted' : 'downvoted'} exercise: '${exercise.content.question.text}'`,
+    message: `Noen ${req.body.positive ? 'stemte opp' : 'stemte ned'} spørsmålet: '${exercise.content.question.text}'`,
     link: `/exercises/${exercise.id}`,
     user_id: exercise.user_id,
   });
@@ -96,7 +96,7 @@ post('/:exerciseId/votes', [authentication, authorization('VOTE_EXERCISE')], asy
     await create('notifications', {
       publisher: exercise.id,
       activity: 'APPROVE_EXERCISE',
-      message: `Exercise got approved: '${exercise.content.question.text}'`,
+      message: `Spørsmål ble godkjent: '${exercise.content.question.text}'`,
       link: `/exercises/${exercise.id}`,
       user_id: exercise.user_id,
     });

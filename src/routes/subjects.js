@@ -69,7 +69,7 @@ post('/', [authentication, authorization('CREATE_COURSE')], async req => {
   await create('notifications', {
     publisher: result.id,
     activity: 'CREATE_COURSE',
-    message: `${req.user.username} created a course '${_.truncate(req.body.name, 20)}'`,
+    message: `${req.user.username} lagde et emne '${_.truncate(req.body.name, 20)}'`,
     link: `/courses/${result.id}`,
     user_id: req.user.id,
   });
@@ -95,7 +95,7 @@ post('/:subjectId/collections', [authentication, authorization('CREATE_TOPIC')],
   create('notifications', {
     publisher: result.id,
     activity: 'CREATE_TOPIC',
-    message: `${req.user.username} created a topic '${_.truncate(req.body.name, 20)}'`,
+    message: `${req.user.username} lagde et tema '${_.truncate(req.body.name, 20)}'`,
     link: `/topics/${result.id}`,
     user_id: req.user.id,
   });
@@ -157,7 +157,7 @@ put('/:subjectId', authentication, async req => {
   create('notifications', {
     publisher: req.params.subjectId,
     activity: 'MODIFY_COURSE',
-    message: `${req.user.username} modified the course '${subject.name}'`,
+    message: `${req.user.username} endret emnet '${subject.name}'`,
     link: `/courses/${subject.id}`,
     user_id: req.user.id,
   });
