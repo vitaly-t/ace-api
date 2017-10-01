@@ -13,9 +13,11 @@ const express = require('express'),
   router = express.Router(),
   db = require('db'),
   sql = require('../services/sql'),
-  _ = require('lodash');
-(authentication = require('../middleware/user-authentication')), (normalizr = require('normalizr')), (commentSchema = new normalizr
-  .schema.Entity('comments'));
+  _ = require('lodash'),
+  authentication = require('../middleware/user-authentication'),
+  authorization = require('../middleware/authorization'),
+  normalizr = require('normalizr'),
+  commentSchema = new normalizr.schema.Entity('comments');
 
 post('/:resourceId/votes', authentication, req =>
   create('votes', {
