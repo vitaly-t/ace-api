@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const mung = require('express-mung');
 const db = require('db');
 
 module.exports = privilege => async (req, res, next) => {
