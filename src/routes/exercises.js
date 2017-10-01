@@ -39,7 +39,7 @@ put('/:exerciseId/', authentication, async req => {
   return result;
 })(router);
 
-post('/:exerciseId/comments', [authentication, authorization('COMMENT_EXERCISE')], async req => {
+post('/:exerciseId/comments', [authentication, authorization('COMMENT')], async req => {
   const exercise = await readOne('exercises', `id=${req.params.exerciseId}`);
   const result = await create('comments', {
     message: req.body.message,
@@ -50,7 +50,7 @@ post('/:exerciseId/comments', [authentication, authorization('COMMENT_EXERCISE')
     create('subscriptions', { publisher: exercise.id, subscriber: req.user.id }),
     create('notifications', {
       publisher: req.params.exerciseId,
-      activity: `COMMENT_EXERCISE`,
+      activity: 'COMMENT',
       message: `${req.user.username} kommenterte på spørsmålet '${exercise.content.question.text}'`,
       link: `/exercises/${exercise.id}`,
       user_id: req.user.id,

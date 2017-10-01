@@ -164,7 +164,7 @@ put('/:subjectId', authentication, async req => {
   return subject;
 })(router);
 
-post('/:id/comments', [authentication, authorization('COMMENT_COURSE')], async req => {
+post('/:id/comments', [authentication, authorization('COMMENT')], async req => {
   const subject = await db.one('select name from subjects where id=$1', req.params.id);
   const result = await create('comments', {
     message: req.body.message,
@@ -175,7 +175,7 @@ post('/:id/comments', [authentication, authorization('COMMENT_COURSE')], async r
     create('subscriptions', { publisher: req.params.id, subscriber: req.user.id }),
     create('notifications', {
       publisher: req.params.id,
-      activity: 'COMMENT_COURSE',
+      activity: 'COMMENT',
       message: `${req.user.username} skrev en kommentar til emnet ${subject.name}`,
       link: `/courses/${req.params.id}`,
       user_id: req.user.id,
