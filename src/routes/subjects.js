@@ -164,49 +164,24 @@ put('/:subjectId', authentication, async req => {
   return subject;
 })(router);
 
-post(
-  '/:subjectId/comments',
-  [
-    authentication,
-    bodyValidation({
-      type: 'object',
-      required: ['message'],
-      properties: { message: { type: 'string' } },
+post('/:id/comments', [authentication, authorization('COMMENT')], async req => {
+  const subject = await db.one('select name from subjects where id=$1', req.params.id);
+  const result = await create('comments', {
+    message: req.body.message,
+    resource_id: req.params.id,
+    user_id: req.user.id,
+  });
+  await Promise.all([
+    create('subscriptions', { publisher: req.params.id, subscriber: req.user.id }),
+    create('notifications', {
+      publisher: req.params.id,
+      activity: 'COMMENT',
+      message: `${req.user.username} skrev en kommentar til emnet ${subject.name}`,
+      link: `/courses/${req.params.id}`,
+      user_id: req.user.id,
     }),
-    authorization('COMMENT'),
-  ],
-  async (req, res) => {
-    const comment = await db.one(sql.common.comment, {
-      message: req.body.message,
-      userId: req.user.id,
-      resourceType: 'subject_id',
-      resource: req.params.subjectId,
-    });
-    await db.one(sql.common.publish, {
-      activity: 'COMMENT_COURSE',
-      publisherType: 'subject_id',
-      publisher: req.params.subjectId,
-      userId: req.user.id,
-    });
-    await db.none(sql.common.subscribe, {
-      publisherType: 'subject_id',
-      publisher: req.params.subjectId,
-      subscriberType: 'user_id',
-      subscriber: req.user.id,
-    });
-    return comment;
-  }
-)(router);
-
-get('/:subjectId/comments', [authentication], async (req, res) => {
-  console.log(
-    `resource_id=(select resources.id from resources join subjects on subject_id=subjects.id where subjects.id=${req.params.subjectId})`
-  );
-  const result = await read(
-    'comments',
-    `resource_id=(select resources.id from resources join subjects on subject_id=subjects.id where subjects.id=${req.params.subjectId})`
-  );
-  return normalizr.normalize(result, [commentSchema]);
+  ]);
+  return result;
 })(router);
 
 module.exports = router;

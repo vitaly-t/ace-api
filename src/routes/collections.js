@@ -100,4 +100,24 @@ del('/:collectionId', [authentication], async req => {
   if (collection.user_id === req.user.id) remove('resources', req.params.collectionId);
 })(router);
 
+post('/:id/comments', [authentication, authorization('COMMENT')], async req => {
+  const collection = await db.one('select name from collections where id=$1', req.params.id);
+  const result = await create('comments', {
+    message: req.body.message,
+    resource_id: req.params.id,
+    user_id: req.user.id,
+  });
+  await Promise.all([
+    create('subscriptions', { publisher: req.params.id, subscriber: req.user.id }),
+    create('notifications', {
+      publisher: req.params.id,
+      activity: 'COMMENT',
+      message: `${req.user.username} skrev en kommentar til temaet ${collection.name}`,
+      link: `/courses/${req.params.id}`,
+      user_id: req.user.id,
+    }),
+  ]);
+  return result;
+})(router);
+
 module.exports = router;
